@@ -13,6 +13,13 @@ from astropy.table import Table
 from astropy import units as u
 import pandas as pd
 
+def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
+    filt_NLAGN = create_MQC_filter(initial_tab, AGN_types[mqc_version])
+    imputed_df['is_AGN']      = (np.array(initial_tab['RA_MILLI'] > 0) & filt_NLAGN).astype(int)
+    imputed_df['is_SDSS_gal'] = np.array(initial_tab['class'] == 3)
+    imputed_df['is_gal']      = imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']
+    return imputed_df
+
 def create_colours(imputed_df):
     imputed_df['g_r']     = imputed_df['gmag']     - imputed_df['rmag']
     imputed_df['r_i']     = imputed_df['rmag']     - imputed_df['imag']
@@ -66,6 +73,16 @@ def create_MQC_filter(initial_tab, AGN_types):
     filters_array = [np.array(np.char.find(initial_tab['TYPE'].data, AGN_type) != -1) for AGN_type in AGN_types]
     or_in_arrays  = np.bitwise_or.reduce(filters_array)
     return or_in_arrays
+
+def create_X_ray_detect(imputed_df, initial_tab):
+    imputed_df['X_ray_detect'] = (np.array(initial_tab['FEP'] > 0) & np.isfinite(initial_tab['FEP'])).astype(int)
+    return imputed_df
+
+def create_radio_detect(imputed_df, initial_tab, radio_cols):
+    filters_array = [(np.array(initial_tab[radio_col] > 0) & np.isfinite(initial_tab[radio_col])) for radio_col in radio_cols]
+    or_in_arrays  = np.bitwise_or.reduce(filters_array)
+    imputed_df['radio_detect'] = or_in_arrays
+    return imputed_df
 
 mqc_version                = '7_4d'  # '7_2' older version
 
@@ -191,24 +208,15 @@ if run_HETDEX_flag:
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
-    imputed_HETDEX_df['X_ray_detect'] = (np.array(HETDEX_initial_tab['FEP'] > 0) & 
-                                        np.isfinite(HETDEX_initial_tab['FEP'])).astype(int)
-    imputed_HETDEX_df['radio_detect'] = ((np.array(HETDEX_initial_tab['Sint_LOFAR'] > 0) & 
-                                        np.isfinite(HETDEX_initial_tab['Sint_LOFAR'])) | 
-                                        (np.array(HETDEX_initial_tab['Stotal_TGSS'] > 0) & 
-                                        np.isfinite(HETDEX_initial_tab['Stotal_TGSS'])) | 
-                                        (np.array(HETDEX_initial_tab['TotalFlux_LoLSS'] > 0) & 
-                                        np.isfinite(HETDEX_initial_tab['TotalFlux_LoLSS'])) | 
-                                        (np.array(HETDEX_initial_tab['Total_flux_VLASS'] > 0) & 
-                                        np.isfinite(HETDEX_initial_tab['Total_flux_VLASS']))).astype(int)
+    imputed_HETDEX_df = create_X_ray_detect(imputed_HETDEX_df, HETDEX_initial_tab)
+    radio_cols_HETDEX = ['Sint_LOFAR', 'Stotal_TGSS', 'TotalFlux_LoLSS', 'Total_flux_VLASS']
+    imputed_HETDEX_df = create_radio_detect(imputed_HETDEX_df, HETDEX_initial_tab, radio_cols_HETDEX)
 
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
     # For MQC 7.2, that means 'N', 'A', 'q'.
     print('Creating flag for AGN classification')
-    filt_NLAGN_HETDEX = create_MQC_filter(HETDEX_initial_tab, AGN_types_list[mqc_version])
-
-    imputed_HETDEX_df['is_AGN'] = (np.array(HETDEX_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_HETDEX).astype(int)
+    imputed_HETDEX_df = create_AGN_gal_flags(HETDEX_initial_tab, imputed_HETDEX_df, AGN_types_list, mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
@@ -314,21 +322,14 @@ if run_S82_flag:
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
-    imputed_S82_df['X_ray_detect'] = (np.array(S82_initial_tab['FEP'] > 0) & 
-                                        np.isfinite(S82_initial_tab['FEP'])).astype(int)
-    imputed_S82_df['radio_detect'] = ((np.array(S82_initial_tab['Stotal_TGSS'] > 0) & 
-                                        np.isfinite(S82_initial_tab['Stotal_TGSS'])) | 
-                                        (np.array(S82_initial_tab['Fint_VLAS82'] > 0) & 
-                                        np.isfinite(S82_initial_tab['Fint_VLAS82'])) | 
-                                        (np.array(S82_initial_tab['Total_flux_VLASS'] > 0) & 
-                                        np.isfinite(S82_initial_tab['Total_flux_VLASS']))).astype(int)
+    imputed_S82_df = create_X_ray_detect(imputed_S82_df, S82_initial_tab)
+    radio_cols_S82 = ['Stotal_TGSS', 'Fint_VLAS82', 'Total_flux_VLASS']
+    imputed_S82_df = create_radio_detect(imputed_S82_df, S82_initial_tab, radio_cols_S82)
 
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
     print('Creating flag for AGN classification')
-    filt_NLAGN_S82 = create_MQC_filter(S82_initial_tab, AGN_types_list[mqc_version])
-
-    imputed_S82_df['is_AGN'] = (np.array(S82_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_S82).astype(int)
+    imputed_S82_df = create_AGN_gal_flags(S82_initial_tab, imputed_S82_df, AGN_types_list, mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
@@ -557,21 +558,14 @@ if run_COSMOS_flag:
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
-    imputed_COSMOS_df['X_ray_detect'] = (np.array(COSMOS_initial_tab['FEP'] > 0) & 
-                                        np.isfinite(COSMOS_initial_tab['FEP'])).astype(int)
-    imputed_COSMOS_df['radio_detect'] = ((np.array(COSMOS_initial_tab['Flux_COSMOSVLA3'] > 0) & 
-                                        np.isfinite(COSMOS_initial_tab['Flux_COSMOSVLA3'])) | 
-                                        (np.array(COSMOS_initial_tab['Stotal_TGSS'] > 0) & 
-                                        np.isfinite(COSMOS_initial_tab['Stotal_TGSS'])) | 
-                                        (np.array(COSMOS_initial_tab['Total_flux_VLASS'] > 0) & 
-                                        np.isfinite(COSMOS_initial_tab['Total_flux_VLASS']))).astype(int)
+    imputed_COSMOS_df = create_X_ray_detect(imputed_COSMOS_df, COSMOS_initial_tab)
+    radio_cols_COSMOS = ['Flux_COSMOSVLA3', 'Stotal_TGSS', 'Total_flux_VLASS']
+    imputed_COSMOS_df = create_radio_detect(imputed_COSMOS_df, COSMOS_initial_tab, radio_cols_COSMOS)
 
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
     print('Creating flag for AGN classification')
-    filt_NLAGN_COSMOS = create_MQC_filter(COSMOS_initial_tab, AGN_types_list[mqc_version])
-
-    imputed_COSMOS_df['is_AGN'] = (np.array(COSMOS_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_COSMOS).astype(int)
+    imputed_COSMOS_df = create_AGN_gal_flags(COSMOS_initial_tab, imputed_COSMOS_df, AGN_types_list, mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
