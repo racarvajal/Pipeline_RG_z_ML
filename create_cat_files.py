@@ -1,0 +1,623 @@
+#!/usr/bin/env python
+
+# Code to create catalogue files from HETDEX
+# and Stripe 82 data.
+# It converts fluxes to magnitudes,
+# imputes missing data and
+# creates new features out of
+# original quantities (colours,
+# ratios, flags, etc.).
+
+import numpy as np
+from astropy.table import Table
+from astropy import units as u
+import pandas as pd
+
+def create_colours(imputed_df):
+    imputed_df['g_r']     = imputed_df['gmag']     - imputed_df['rmag']
+    imputed_df['r_i']     = imputed_df['rmag']     - imputed_df['imag']
+    imputed_df['i_z']     = imputed_df['imag']     - imputed_df['zmag']
+    imputed_df['z_y']     = imputed_df['zmag']     - imputed_df['ymag']
+    imputed_df['g_i']     = imputed_df['gmag']     - imputed_df['imag']
+    imputed_df['w1_w2']   = imputed_df['W1mproPM'] - imputed_df['W2mproPM']
+    # imputed_df['w1_w2']   = imputed_df['W1mag']    - imputed_df['W2mag']
+    # imputed_df['w2_w3']   = imputed_df['W2mag']    - imputed_df['W3mag']
+    imputed_df['w2_w3']   = imputed_df['W2mproPM'] - imputed_df['W3mag']
+    imputed_df['w3_w4']   = imputed_df['W3mag']    - imputed_df['W4mag']
+    imputed_df['J_H']     = imputed_df['Jmag']     - imputed_df['Hmag']
+    imputed_df['H_K']     = imputed_df['Hmag']     - imputed_df['Kmag']
+    imputed_df['FUV_NUV'] = imputed_df['FUVmag']   - imputed_df['NUVmag']
+    return imputed_df
+
+def create_ratios(imputed_df):
+    imputed_df['r/z']     = imputed_df.loc[:, 'rmag']     / imputed_df.loc[:, 'zmag']
+    imputed_df['i/y']     = imputed_df.loc[:, 'imag']     / imputed_df.loc[:, 'ymag']
+    imputed_df['w1/w3']   = imputed_df.loc[:, 'W1mproPM'] / imputed_df.loc[:, 'W3mag']
+    imputed_df['w1/w4']   = imputed_df.loc[:, 'W1mproPM'] / imputed_df.loc[:, 'W4mag']
+    imputed_df['w2/w4']   = imputed_df.loc[:, 'W2mproPM'] / imputed_df.loc[:, 'W4mag']
+    imputed_df['J/K']     = imputed_df.loc[:, 'Jmag']     / imputed_df.loc[:, 'Kmag']
+    imputed_df['FUV/K']   = imputed_df.loc[:, 'FUVmag']   / imputed_df.loc[:, 'Kmag']
+    imputed_df['g/J']     = imputed_df.loc[:, 'gmag']     / imputed_df.loc[:, 'Jmag']
+    imputed_df['r/H']     = imputed_df.loc[:, 'rmag']     / imputed_df.loc[:, 'Hmag']
+    imputed_df['i/K']     = imputed_df.loc[:, 'imag']     / imputed_df.loc[:, 'Kmag']
+    imputed_df['z/W1']    = imputed_df.loc[:, 'zmag']     / imputed_df.loc[:, 'W1mproPM']
+    imputed_df['y/W2']    = imputed_df.loc[:, 'ymag']     / imputed_df.loc[:, 'W2mproPM']
+    return imputed_df
+
+def fix_dtypes(initial_tab):
+    for col in initial_tab.colnames:
+        if initial_tab[col].dtype.name == 'float64':
+            initial_tab[col] = initial_tab[col].astype(np.float32)
+        elif 'float' in initial_tab[col].dtype.name:
+            initial_tab[col].fill_value = np.nan
+        elif initial_tab[col].dtype.name == 'int64':
+            initial_tab[col] = initial_tab[col].astype(np.int32)
+        elif 'bytes' in initial_tab[col].dtype.name:
+            initial_tab[col] = initial_tab[col].astype(np.str)
+    # Special case
+    initial_tab['QPCT'] = initial_tab['QPCT'].astype(np.int32)
+    return initial_tab
+
+def create_band_count(mags_df, magnitude_cols, feat_name):
+    band_count_df  = pd.DataFrame()
+    na_bool        = 1 - mags_df.loc[:, magnitude_cols].isna().astype(int)
+    band_count_df[feat_name] = na_bool.sum(axis=1)
+    return band_count_df
+
+def create_MQC_filter(initial_tab, AGN_types):
+    filters_array = [np.array(np.char.find(initial_tab['TYPE'].data, AGN_type) != -1) for AGN_type in AGN_types]
+    or_in_arrays  = np.bitwise_or.reduce(filters_array)
+    return or_in_arrays
+
+mqc_version                = '7_4d'  # '7_2' older version
+
+file_path                  = '/mnt/data_raid0_ssd/rcarvajal/ML_QSO/Catalogs/'  # nonius2oal-0-18
+file_name_HETDEX           = f'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS.fits'  # fits file
+file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE.fits'  # fits file
+file_name_S82_Ananna       = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_Ananna_17_zsp.fits'  # fits file with additional data from Ananna+2017 and zsp
+# file_name_S82              = file_name_S82_Ananna  # temp fits file with additional data from Ananna+2017 and zsp
+file_name_COSMOS           = f'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE.fits'  # fits file
+file_name_clean_HETDEX     = file_name_HETDEX.replace('.fits', '_5sigma_imp.h5')      # h5 file
+file_name_clean_S82        = file_name_S82.replace('.fits', '_5sigma_imp.h5')         # h5 file
+# file_name_clean_S82        = file_name_S82_Ananna.replace('fits', 'h5')  # h5 file, temp line
+file_name_clean_COSMOS     = file_name_COSMOS.replace('.fits', '_5sigma_imp.h5')      # h5 file
+file_name_COSMOS_err       = 'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE.fits'  # fits file
+file_name_clean_HETDEX_err = file_name_HETDEX.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
+file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5')         # h5 file
+# file_name_clean_S82_err    = file_name_S82_Ananna.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
+file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
+
+run_HETDEX_flag = False
+run_S82_flag    = False
+run_COSMOS_flag = False
+
+run_HETDEX_errors_flag = False
+run_S82_errors_flag    = False
+run_COSMOS_errors_flag = False
+
+save_HETDEX_flag = False
+save_S82_flag    = False
+save_COSMOS_flag = False
+
+save_HETDEX_errors_flag = False
+save_S82_errors_flag    = False
+save_COSMOS_errors_flag = False
+
+if run_HETDEX_errors_flag: run_HETDEX_flag = True
+if run_S82_errors_flag:    run_S82_flag    = True
+if run_COSMOS_errors_flag: run_COSMOS_flag = True
+
+all_vega_cols  = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag',\
+                    'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag', 'e_W4mag', 'e_Jmag',\
+                    'e_Hmag', 'e_Kmag']
+vega_cols      = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag']
+vega_shift     = {'W1mproPM': 2.699, 'W2mproPM': 3.339, 'W1mag': 2.699, 'W2mag': 3.339, 'W3mag': 5.174,\
+                    'W4mag': 6.620, 'Jmag': 0.910, 'Hmag': 1.390, 'Kmag': 1.850}
+
+mag_cols_lim_adhoc  = {'W1mproPM': 22.8, 'W2mproPM': 22.1, 'Sint_LOFAR': 18.9, 'Total_flux_VLASS': 17.2,\
+                    'TotalFlux_LoLSS': 14.65, 'Stotal_TGSS': 13.8, 'Fint_VLAS82': 19.6,\
+                    'Flux_COSMOSVLA3': 21.4, 'W1mag': 21.8, 'W2mag': 21.4, 'W3mag': 18.7,\
+                    'W4mag': 16.7, 'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3,\
+                    'ymag': 21.4, 'FUVmag': 23.5, 'NUVmag': 24.0, 'FEP': 57.9, 'Jmag': 20.0,\
+                    'Hmag': 19.4, 'Kmag': 19.35}  # Original (ad-hoc) limits
+
+mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52, 'Total_flux_VLASS': 15.21,\
+                    'TotalFlux_LoLSS': 12.91, 'Stotal_TGSS': 11.18, 'Fint_VLAS82': 17.86,\
+                    'Flux_COSMOSVLA3': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67,\
+                    'W4mag': 14.62, 'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3,\
+                    'ymag': 21.4, 'FUVmag': 20.0, 'NUVmag': 21.0, 'FEP': 57.9, 'Jmag': 17.45,\
+                    'Hmag': 17.24, 'Kmag': 16.59}  # Proper (5-sigma) limits
+
+for key in mag_cols_lim_adhoc:
+    mag_cols_lim_adhoc[key] = np.float32(mag_cols_lim_adhoc[key])
+for key in mag_cols_lim_5sigma:
+    mag_cols_lim_5sigma[key] = np.float32(mag_cols_lim_5sigma[key])
+
+mag_cols_lim        = {'adhoc': mag_cols_lim_adhoc, '5sigma': mag_cols_lim_5sigma}
+
+AGN_types_list    = {'7_4d': ['Q', 'A', 'B', 'L', 'K', 'N', 'R', 'X', '2'], '7_2': ['Q', 'B', 'L', 'K', 'R', 'X', '2']}
+
+if run_HETDEX_flag:
+    print('-' * 40)
+    print('Working with HETDEX data')
+    print('Reading files')
+    HETDEX_initial_tab     = Table.read(file_path + file_name_HETDEX, format='fits')
+
+    print('Fixing dtypes')
+    HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
+
+    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                'DEC_MILLI', 'TYPE', 'Z'] # , 'COMMENT']
+    clean_cat_HETDEX_df = HETDEX_initial_tab[id_cols].to_pandas()
+
+    zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
+
+    print('Convert fluxes to magnitudes')
+    xray_freqs  = {'FEP':            1.51e+18 * u.Hz}
+    xray_cols   = ['FEP']
+    for col in xray_cols:
+        HETDEX_initial_tab[col]       = HETDEX_initial_tab[col] / xray_freqs[col]
+        # HETDEX_initial_tab[col].unit /= u.Hz
+        HETDEX_initial_tab[col].unit  = u.mW * u.m**-2 * u.Hz**-1
+        HETDEX_initial_tab[col]       = HETDEX_initial_tab[col].to(u.mJy)
+
+    # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'TotalFlux_LoLSS']
+    mJy_cols_HETDEX = [col_name for col_name in HETDEX_initial_tab.colnames if 
+                HETDEX_initial_tab[col_name].unit == 'mJy' and not 
+                (col_name.startswith('e') or col_name.startswith('E'))]
+
+    for col in mJy_cols_HETDEX:
+        HETDEX_initial_tab[col] = HETDEX_initial_tab[col].to(u.mag(u.AB))
+
+    # Transform Vega magnitudes to AB magnitudes
+    print('Transforming Vega to AB')
+    for col in vega_cols:
+        HETDEX_initial_tab[col] += vega_shift[col]
+
+    # sys.exit()
+
+    # Fix units of magnitudes for following steps
+    for col in HETDEX_initial_tab.colnames:
+        if HETDEX_initial_tab[col].unit == u.mag:
+            HETDEX_initial_tab[col].unit = u.mag(u.AB)
+            HETDEX_initial_tab[col]      = u.Magnitude(HETDEX_initial_tab[col])
+
+    # Select features to impute
+    magnitude_cols = [col_name for col_name in HETDEX_initial_tab.colnames if 
+                HETDEX_initial_tab[col_name].unit == u.mag(u.AB) and not 
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+
+    magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_HETDEX]
+
+    mags_HETDEX_df      = HETDEX_initial_tab[magnitude_cols].to_pandas()
+    imputed_HETDEX_df   = pd.DataFrame()
+
+    # Create flags for X-ray and radio detection, and AGN classification
+    print('Creating flags for X-ray and radio detections')
+    imputed_HETDEX_df['X_ray_detect'] = (np.array(HETDEX_initial_tab['FEP'] > 0) & 
+                                        np.isfinite(HETDEX_initial_tab['FEP'])).astype(int)
+    imputed_HETDEX_df['radio_detect'] = ((np.array(HETDEX_initial_tab['Sint_LOFAR'] > 0) & 
+                                        np.isfinite(HETDEX_initial_tab['Sint_LOFAR'])) | 
+                                        (np.array(HETDEX_initial_tab['Stotal_TGSS'] > 0) & 
+                                        np.isfinite(HETDEX_initial_tab['Stotal_TGSS'])) | 
+                                        (np.array(HETDEX_initial_tab['TotalFlux_LoLSS'] > 0) & 
+                                        np.isfinite(HETDEX_initial_tab['TotalFlux_LoLSS'])) | 
+                                        (np.array(HETDEX_initial_tab['Total_flux_VLASS'] > 0) & 
+                                        np.isfinite(HETDEX_initial_tab['Total_flux_VLASS']))).astype(int)
+
+    # Select, from MQC, sources that have been classified 
+    # as host-dominated NLAGN, AGN, or QSO candidates.
+    # For MQC 7.2, that means 'N', 'A', 'q'.
+    print('Creating flag for AGN classification')
+    filt_NLAGN_HETDEX = create_MQC_filter(HETDEX_initial_tab, AGN_types_list[mqc_version])
+
+    imputed_HETDEX_df['is_AGN'] = (np.array(HETDEX_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_HETDEX).astype(int)
+
+    # Remove columns with too high numbe of missing values
+    print('Removing columns with high nullity')
+    removed_cols   = []
+    limit_fraction = 1.00
+    for col in magnitude_cols:
+        filt_temp = np.isfinite(HETDEX_initial_tab[col])
+        removed   = 'NOT REMOVED'
+        if np.sum(~filt_temp) > int(np.ceil(limit_fraction * len(HETDEX_initial_tab[col]))):
+            removed_cols.append(col)
+            magnitude_cols.remove(col)
+            removed = 'REMOVED'
+            print(f'column: {col}\t -\t n_bad: {np.sum(~filt_temp)}\t{removed}')
+
+    # Create counter of measurements per source (magnitudes)
+    print('Creating new features:')
+    print('Creating counter of valid measurements')
+    band_count_HETDEX_df = create_band_count(mags_HETDEX_df, magnitude_cols_non_radio, 'band_num')
+
+    # Impute values
+    print('Imputing values')
+    
+    for col in magnitude_cols:
+        imputed_HETDEX_df.loc[:, col] = mags_HETDEX_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
+        imputed_HETDEX_df.loc[:, col] = imputed_HETDEX_df.loc[:, col].mask(imputed_HETDEX_df.loc[:, col] >\
+             mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+
+    # Create derived features
+    print('Creating colours')
+    imputed_HETDEX_df = create_colours(imputed_HETDEX_df)
+
+    print('Creating magnitude ratios')
+    imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
+
+    if save_HETDEX_flag:
+        print('Joining all tables')
+        clean_cat_final_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_HETDEX_df], axis=1)
+        # print(clean_cat_final_df)
+        # save new catalogue to a hdf5 file (.h5)
+        print('Saving final table to file')
+        clean_cat_final_HETDEX_df.to_hdf(file_path + file_name_clean_HETDEX, key='df')
+
+#######
+
+if run_S82_flag:
+    print('-' * 40)
+    print('Working with Stripe 82 data')
+    print('Reading files')
+    S82_initial_tab     = Table.read(file_path + file_name_S82, format='fits')
+
+    print('Fixing dtypes')
+    S82_initial_tab     = fix_dtypes(S82_initial_tab)
+
+    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                'DEC_MILLI', 'TYPE', 'Z'] # , 'COMMENT']  # zsp for Annana+17
+    if 'Ananna_17' in file_name_S82:
+        id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']  # zsp for Annana+17
+    clean_cat_S82_df = S82_initial_tab[id_cols].to_pandas()
+
+    zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
+
+    print('Convert fluxes to magnitudes')
+    xray_freqs  = {'FEP':            1.51e+18 * u.Hz}
+    xray_cols   = ['FEP']
+    for col in xray_cols:
+        S82_initial_tab[col]       = S82_initial_tab[col] / xray_freqs[col]
+        # S82_initial_tab[col].unit /= u.Hz
+        S82_initial_tab[col].unit  = u.mW * u.m**-2 * u.Hz**-1
+        S82_initial_tab[col]       = S82_initial_tab[col].to(u.mJy)
+
+    # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'Fint_VLAS82']
+    mJy_cols_S82 = [col_name for col_name in S82_initial_tab.colnames if 
+                S82_initial_tab[col_name].unit == 'mJy' and not 
+                (col_name.startswith('e') or col_name.startswith('E')) and not 'rms' in col_name]
+
+    for col in mJy_cols_S82:
+        S82_initial_tab[col] = S82_initial_tab[col].to(u.mag(u.AB))
+
+    # Transform Vega magnitudes to AB magnitudes
+    print('Transforming Vega to AB')
+    
+    for col in vega_cols:
+        S82_initial_tab[col] += vega_shift[col]
+
+    # sys.exit()
+
+    # Fix units of magnitudes for following steps
+    for col in S82_initial_tab.colnames:
+        if S82_initial_tab[col].unit == u.mag:
+            S82_initial_tab[col].unit = u.mag(u.AB)
+            S82_initial_tab[col]      = u.Magnitude(S82_initial_tab[col])
+
+    # Select features to impute
+    magnitude_cols = [col_name for col_name in S82_initial_tab.colnames if 
+                S82_initial_tab[col_name].unit == u.mag(u.AB) and not 
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+
+    magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_S82]
+
+    mags_S82_df      = S82_initial_tab[magnitude_cols].to_pandas()
+    imputed_S82_df   = pd.DataFrame()
+
+    # Create flags for X-ray and radio detection, and AGN classification
+    print('Creating flags for X-ray and radio detections')
+    imputed_S82_df['X_ray_detect'] = (np.array(S82_initial_tab['FEP'] > 0) & 
+                                        np.isfinite(S82_initial_tab['FEP'])).astype(int)
+    imputed_S82_df['radio_detect'] = ((np.array(S82_initial_tab['Stotal_TGSS'] > 0) & 
+                                        np.isfinite(S82_initial_tab['Stotal_TGSS'])) | 
+                                        (np.array(S82_initial_tab['Fint_VLAS82'] > 0) & 
+                                        np.isfinite(S82_initial_tab['Fint_VLAS82'])) | 
+                                        (np.array(S82_initial_tab['Total_flux_VLASS'] > 0) & 
+                                        np.isfinite(S82_initial_tab['Total_flux_VLASS']))).astype(int)
+
+    # Select, from MQC, sources that have been classified 
+    # as host-dominated NLAGN, AGN, or QSO candidates.
+    print('Creating flag for AGN classification')
+    filt_NLAGN_S82 = create_MQC_filter(S82_initial_tab, AGN_types_list[mqc_version])
+
+    imputed_S82_df['is_AGN'] = (np.array(S82_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_S82).astype(int)
+
+    # Remove columns with too high numbe of missing values
+    print('Removing columns with high nullity')
+    removed_cols   = []
+    limit_fraction = 1.00
+    for col in magnitude_cols:
+        filt_temp = np.isfinite(S82_initial_tab[col])
+        removed   = 'NOT REMOVED'
+        if np.sum(~filt_temp) > int(np.ceil(limit_fraction * len(S82_initial_tab[col]))):
+            removed_cols.append(col)
+            magnitude_cols.remove(col)
+            removed = 'REMOVED'
+            print(f'column: {col}\t -\t n_bad: {np.sum(~filt_temp)}\t{removed}')
+
+    # Create counter of measurements per source (magnitudes)
+    print('Creating new features:')
+    print('Creating counter of valid measurements')
+    band_count_S82_df = create_band_count(mags_S82_df, magnitude_cols_non_radio, 'band_num')
+
+    # Impute values
+    print('Imputing values')
+    
+    for col in magnitude_cols:
+        imputed_S82_df.loc[:, col] = mags_S82_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
+        imputed_S82_df.loc[:, col] = imputed_S82_df.loc[:, col].mask(imputed_S82_df.loc[:, col] >\
+             mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+
+    # Create derived features
+    print('Creating colours')
+    imputed_S82_df = create_colours(imputed_S82_df)
+
+    print('Creating magnitude ratios')
+    imputed_S82_df = create_ratios(imputed_S82_df)
+
+    if save_S82_flag:
+        print('Joining all tables')
+        clean_cat_final_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_S82_df], axis=1)
+
+        # sys.exit()
+
+        # print(clean_cat_final_df)
+        # save new catalogue to a hdf5 file (.h5)
+        print('Saving final table to file')
+        clean_cat_final_S82_df.to_hdf(file_path + file_name_clean_S82, key='df')
+
+if run_S82_errors_flag:
+    print('-' * 40)
+    print('Working with Stripe 82 data uncertainties')
+    print('Reading files')
+    S82_initial_tab     = Table.read(file_path + file_name_S82, format='fits')
+
+    print('Fixing dtypes')
+    S82_initial_tab     = fix_dtypes(S82_initial_tab)
+
+    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                'DEC_MILLI', 'TYPE', 'Z'] # , 'COMMENT']
+    clean_cat_S82_err_df = S82_initial_tab[id_cols].to_pandas()
+
+    zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
+
+    # Vega magnitude uncertainties are equivalent in AB
+
+    mag_err_cols   = ['e_FUVmag', 'e_NUVmag', 'e_gmag', 'e_rmag', 'e_imag', 'e_zmag', 'e_ymag', 'e_Jmag',\
+                     'e_Hmag', 'e_Kmag', 'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag',\
+                     'e_W4mag']
+
+    # Fix units of magnitudes for following steps
+    for col in mag_err_cols:
+        if S82_initial_tab[col].unit == u.mag:
+            S82_initial_tab[col].unit = u.mag(u.AB)
+            S82_initial_tab[col]      = u.Magnitude(S82_initial_tab[col])
+
+    # Remove columns with too high numbe of missing values
+    print('Removing columns with high nullity')
+    removed_cols   = []
+    limit_fraction = 1.00
+    for col in mag_err_cols:
+        filt_temp = np.isfinite(S82_initial_tab[col])
+        removed   = 'NOT REMOVED'
+        if np.sum(~filt_temp) > int(np.ceil(limit_fraction * len(S82_initial_tab[col]))):
+            removed_cols.append(col)
+            mag_err_cols.remove(col)
+            removed = 'REMOVED'
+            print(f'column: {col}\t -\t n_bad: {np.sum(~filt_temp)}\t{removed}')
+
+    mags_errs_S82_df    = S82_initial_tab[mag_err_cols].to_pandas()
+    imputed_errs_S82_df = mags_errs_S82_df.copy()
+
+    # Impute missing error values with zero
+    print('Imputing values')
+    for col in mag_err_cols:
+        imputed_errs_S82_df.loc[np.array(mags_errs_S82_df.loc[:, col] < 0), col] = np.float32(1e-6)
+        imputed_errs_S82_df.loc[:, col] = mags_errs_S82_df.loc[:, col].fillna(np.float32(1e-6), inplace=False)
+
+    # Create uncertainties for derived features
+    print('Creating colour errors')
+    imputed_errs_S82_df['e_g_r']   = (np.sqrt(imputed_errs_S82_df['e_gmag']**2     + imputed_errs_S82_df['e_rmag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_r_i']   = (np.sqrt(imputed_errs_S82_df['e_rmag']**2     + imputed_errs_S82_df['e_imag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_i_z']   = (np.sqrt(imputed_errs_S82_df['e_imag']**2     + imputed_errs_S82_df['e_zmag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_z_y']   = (np.sqrt(imputed_errs_S82_df['e_zmag']**2     + imputed_errs_S82_df['e_ymag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_g_i']   = (np.sqrt(imputed_errs_S82_df['e_gmag']**2     + imputed_errs_S82_df['e_imag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_w1_w2'] = (np.sqrt(imputed_errs_S82_df['e_W1mproPM']**2 + imputed_errs_S82_df['e_W2mproPM']**2)).astype(np.float32)
+    # imputed_errs_S82_df['e_w1_w2'] = np.sqrt(imputed_errs_S82_df['e_W1mag']**2    + imputed_errs_S82_df['e_W2mag']**2)
+    imputed_errs_S82_df['e_w2_w3']      = (np.sqrt(imputed_errs_S82_df['e_W2mag']**2    + imputed_errs_S82_df['e_W3mag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_w3_w4']      = (np.sqrt(imputed_errs_S82_df['e_W3mag']**2    + imputed_errs_S82_df['e_W4mag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_J_H']        = (np.sqrt(imputed_errs_S82_df['e_Jmag']**2     + imputed_errs_S82_df['e_Hmag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_H_K']        = (np.sqrt(imputed_errs_S82_df['e_Hmag']**2     + imputed_errs_S82_df['e_Kmag']**2)).astype(np.float32)
+    imputed_errs_S82_df['e_FUV_NUV']    = (np.sqrt(imputed_errs_S82_df['e_FUVmag']**2   + imputed_errs_S82_df['e_NUVmag']**2)).astype(np.float32)
+
+    print('Creating magnitude ratio errors')
+    imputed_errs_S82_df['e_r/z']   = (imputed_S82_df['r/z'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_rmag'] / imputed_S82_df.loc[:, 'rmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_zmag'] / imputed_S82_df.loc[:, 'zmag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_i/y']   = (imputed_S82_df['i/y'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_imag'] / imputed_S82_df.loc[:, 'imag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_ymag'] / imputed_S82_df.loc[:, 'ymag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_w1/w3'] = (imputed_S82_df['w1/w3'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_W3mag'] / imputed_S82_df.loc[:, 'W3mag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_w1/w4'] = (imputed_S82_df['w1/w4'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_W4mag'] / imputed_S82_df.loc[:, 'W4mag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_w2/w4'] = (imputed_S82_df['w2/w4'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W2mproPM'] / imputed_S82_df.loc[:, 'W2mproPM'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_W4mag'] / imputed_S82_df.loc[:, 'W4mag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_J/K']   = (imputed_S82_df['J/K'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_Jmag'] / imputed_S82_df.loc[:, 'Jmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_FUV/K'] = (imputed_S82_df['FUV/K'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_FUVmag'] / imputed_S82_df.loc[:, 'FUVmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
+
+    imputed_errs_S82_df['e_g/J']   = (imputed_S82_df['g/J'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_gmag'] / imputed_S82_df.loc[:, 'gmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_Jmag'] / imputed_S82_df.loc[:, 'Jmag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_r/H']   = (imputed_S82_df['r/H'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_rmag'] / imputed_S82_df.loc[:, 'rmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_Hmag'] / imputed_S82_df.loc[:, 'Hmag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_i/K']   = (imputed_S82_df['i/K'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_imag'] / imputed_S82_df.loc[:, 'imag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_z/W1']  = (imputed_S82_df['z/W1'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_zmag'] / imputed_S82_df.loc[:, 'zmag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2)).astype(np.float32)
+    imputed_errs_S82_df['e_y/W2']  = (imputed_S82_df['y/W2'] *\
+                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_ymag'] / imputed_S82_df.loc[:, 'ymag'])**2 +\
+                                    (imputed_errs_S82_df.loc[:, 'e_W2mproPM'] / imputed_S82_df.loc[:, 'W2mproPM'])**2)).astype(np.float32)
+
+    if save_S82_errors_flag:
+        print('Joining all tables')
+        clean_cat_final_S82_err_df = pd.concat([clean_cat_S82_err_df, imputed_errs_S82_df], axis=1)
+
+        # sys.exit()
+
+        # print(clean_cat_final_S82_err_df)
+        # save new catalogue to a hdf5 file (.h5)
+    
+        print('Saving final table to file')
+        clean_cat_final_S82_err_df.to_hdf(file_path + file_name_clean_S82_err, key='df')
+
+
+#######
+# Run for COSMOS data
+if run_COSMOS_flag:
+    print('-' * 40)
+    print('Working with COSMOS Field data')
+    print('Reading files')
+    COSMOS_initial_tab     = Table.read(file_path + file_name_COSMOS, format='fits')
+
+    print('Fixing dtypes')
+    COSMOS_initial_tab     = fix_dtypes(COSMOS_initial_tab)
+    
+    for col in ['objID', 'Name', 'TYPE']: # , 'COMMENT']:
+        COSMOS_initial_tab[col].fill_value = ''
+        COSMOS_initial_tab[col]   = COSMOS_initial_tab[col].astype(np.str)
+
+    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                'DEC_MILLI', 'TYPE', 'Z'] # , 'COMMENT']
+    clean_cat_COSMOS_df = COSMOS_initial_tab[id_cols].filled().to_pandas()
+    
+    # fix dtypes
+    clean_cat_COSMOS_df.loc[:,['objID', 'Name', 'TYPE']] = clean_cat_COSMOS_df[['objID', 'Name', 'TYPE']].applymap(str)
+
+    zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
+
+    print('Convert fluxes to magnitudes')
+    xray_freqs  = {'FEP':            1.51e+18 * u.Hz}
+    xray_cols   = ['FEP']
+    for col in xray_cols:
+        COSMOS_initial_tab[col]       = COSMOS_initial_tab[col] / xray_freqs[col]
+        # COSMOS_initial_tab[col].unit /= u.Hz
+        COSMOS_initial_tab[col].unit  = u.mW * u.m**-2 * u.Hz**-1
+        COSMOS_initial_tab[col]       = COSMOS_initial_tab[col].to(u.mJy)
+
+    # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'Fint_VLACOSMOS']
+    mJy_cols_COSMOS = [col_name for col_name in COSMOS_initial_tab.colnames if 
+                (COSMOS_initial_tab[col_name].unit == 'mJy' or COSMOS_initial_tab[col_name].unit == 'uJy') and not 
+                (col_name.startswith('e') or col_name.startswith('E'))]
+
+    for col in mJy_cols_COSMOS:
+        COSMOS_initial_tab[col] = COSMOS_initial_tab[col].to(u.mag(u.AB))
+
+    # Transform Vega magnitudes to AB magnitudes
+    print('Transforming Vega to AB')
+    
+    for col in vega_cols:
+        COSMOS_initial_tab[col] += vega_shift[col]
+
+    # sys.exit()
+
+    # Fix units of magnitudes for following steps
+    for col in COSMOS_initial_tab.colnames:
+        if COSMOS_initial_tab[col].unit == u.mag:
+            COSMOS_initial_tab[col].unit = u.mag(u.AB)
+            COSMOS_initial_tab[col]      = u.Magnitude(COSMOS_initial_tab[col])
+
+    # Select features to impute
+    magnitude_cols = [col_name for col_name in COSMOS_initial_tab.colnames if 
+                COSMOS_initial_tab[col_name].unit == u.mag(u.AB) and not 
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+
+    magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_COSMOS]
+
+    mags_COSMOS_df      = COSMOS_initial_tab[magnitude_cols].to_pandas()
+    imputed_COSMOS_df   = pd.DataFrame()
+
+    # Create flags for X-ray and radio detection, and AGN classification
+    print('Creating flags for X-ray and radio detections')
+    imputed_COSMOS_df['X_ray_detect'] = (np.array(COSMOS_initial_tab['FEP'] > 0) & 
+                                        np.isfinite(COSMOS_initial_tab['FEP'])).astype(int)
+    imputed_COSMOS_df['radio_detect'] = ((np.array(COSMOS_initial_tab['Flux_COSMOSVLA3'] > 0) & 
+                                        np.isfinite(COSMOS_initial_tab['Flux_COSMOSVLA3'])) | 
+                                        (np.array(COSMOS_initial_tab['Stotal_TGSS'] > 0) & 
+                                        np.isfinite(COSMOS_initial_tab['Stotal_TGSS'])) | 
+                                        (np.array(COSMOS_initial_tab['Total_flux_VLASS'] > 0) & 
+                                        np.isfinite(COSMOS_initial_tab['Total_flux_VLASS']))).astype(int)
+
+    # Select, from MQC, sources that have been classified 
+    # as host-dominated NLAGN, AGN, or QSO candidates.
+    print('Creating flag for AGN classification')
+    filt_NLAGN_COSMOS = create_MQC_filter(COSMOS_initial_tab, AGN_types_list[mqc_version])
+
+    imputed_COSMOS_df['is_AGN'] = (np.array(COSMOS_initial_tab['RA_MILLI'] > 0) & filt_NLAGN_COSMOS).astype(int)
+
+    # Remove columns with too high numbe of missing values
+    print('Removing columns with high nullity')
+    removed_cols   = []
+    limit_fraction = 1.00
+    for col in magnitude_cols:
+        filt_temp = np.isfinite(COSMOS_initial_tab[col])
+        removed   = 'NOT REMOVED'
+        if np.sum(~filt_temp) > int(np.ceil(limit_fraction * len(COSMOS_initial_tab[col]))):
+            removed_cols.append(col)
+            magnitude_cols.remove(col)
+            removed = 'REMOVED'
+            print(f'column: {col}\t -\t n_bad: {np.sum(~filt_temp)}\t{removed}')
+
+    # Create counter of measurements per source (magnitudes)
+    print('Creating new features:')
+    print('Creating counter of valid measurements')
+    band_count_COSMOS_df = create_band_count(mags_COSMOS_df, magnitude_cols_non_radio, 'band_num')
+
+    # Impute values
+    print('Imputing values')
+    
+    for col in magnitude_cols:
+        imputed_COSMOS_df.loc[:, col] = mags_COSMOS_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
+        imputed_COSMOS_df.loc[:, col] = imputed_COSMOS_df.loc[:, col].mask(imputed_COSMOS_df.loc[:, col] >\
+             mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+
+    # Create derived features
+    print('Creating colours')
+    imputed_COSMOS_df = create_colours(imputed_COSMOS_df)
+
+    print('Creating magnitude ratios')
+    imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
+
+    if save_COSMOS_flag:
+        print('Joining all tables')
+        clean_cat_final_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_COSMOS_df], axis=1)
+
+        # sys.exit()
+        # print(clean_cat_final_COSMOS_df.loc[:20, 'TYPE'])
+
+        # print(clean_cat_final_df)
+        # save new catalogue to a hdf5 file (.h5)
+    
+        print('Saving final table to file')
+        clean_cat_final_COSMOS_df.to_hdf(file_path + file_name_clean_COSMOS, key='df')
