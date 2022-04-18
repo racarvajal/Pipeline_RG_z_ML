@@ -210,3 +210,6 @@ catboost_info/
 
 # Model files
 *.pkl
+
+# Figures created and saved
+plots/*
