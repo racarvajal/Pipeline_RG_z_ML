@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-# Code to create catalogue files from HETDEX
-# and Stripe 82 data.
+# Code to create catalogue files from
+# HETDEX, Stripe 82, and COSMOS data.
 # It converts fluxes to magnitudes,
 # imputes missing data and
 # creates new features out of
@@ -20,8 +20,6 @@ def create_colours(imputed_df):
     imputed_df['z_y']     = imputed_df['zmag']     - imputed_df['ymag']
     imputed_df['g_i']     = imputed_df['gmag']     - imputed_df['imag']
     imputed_df['w1_w2']   = imputed_df['W1mproPM'] - imputed_df['W2mproPM']
-    # imputed_df['w1_w2']   = imputed_df['W1mag']    - imputed_df['W2mag']
-    # imputed_df['w2_w3']   = imputed_df['W2mag']    - imputed_df['W3mag']
     imputed_df['w2_w3']   = imputed_df['W2mproPM'] - imputed_df['W3mag']
     imputed_df['w3_w4']   = imputed_df['W3mag']    - imputed_df['W4mag']
     imputed_df['J_H']     = imputed_df['Jmag']     - imputed_df['Hmag']
@@ -72,16 +70,15 @@ def create_MQC_filter(initial_tab, AGN_types):
 mqc_version                = '7_4d'  # '7_2' older version
 
 file_path                  = '/mnt/data_raid0_ssd/rcarvajal/ML_QSO/Catalogs/'  # nonius2oal-0-18
-file_name_HETDEX           = f'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS.fits'  # fits file
-file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE.fits'  # fits file
+file_name_HETDEX           = f'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
+file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
 file_name_S82_Ananna       = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_Ananna_17_zsp.fits'  # fits file with additional data from Ananna+2017 and zsp
 # file_name_S82              = file_name_S82_Ananna  # temp fits file with additional data from Ananna+2017 and zsp
-file_name_COSMOS           = f'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE.fits'  # fits file
+file_name_COSMOS           = f'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
 file_name_clean_HETDEX     = file_name_HETDEX.replace('.fits', '_5sigma_imp.h5')      # h5 file
 file_name_clean_S82        = file_name_S82.replace('.fits', '_5sigma_imp.h5')         # h5 file
 # file_name_clean_S82        = file_name_S82_Ananna.replace('fits', 'h5')  # h5 file, temp line
 file_name_clean_COSMOS     = file_name_COSMOS.replace('.fits', '_5sigma_imp.h5')      # h5 file
-file_name_COSMOS_err       = 'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE.fits'  # fits file
 file_name_clean_HETDEX_err = file_name_HETDEX.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5')         # h5 file
 # file_name_clean_S82_err    = file_name_S82_Ananna.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
