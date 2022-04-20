@@ -58,7 +58,7 @@ def fix_dtypes(initial_tab):
         elif initial_tab[col].dtype.name == 'int64':
             initial_tab[col] = initial_tab[col].astype(np.int32)
         elif 'bytes' in initial_tab[col].dtype.name:
-            initial_tab[col] = initial_tab[col].astype(np.str)
+            initial_tab[col] = initial_tab[col].astype(str)
     # Special case
     initial_tab['QPCT'] = initial_tab['QPCT'].astype(np.int32)
     return initial_tab
