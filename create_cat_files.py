@@ -109,7 +109,7 @@ run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
 run_COSMOS_errors_flag = False
 
-save_HETDEX_flag = True
+save_HETDEX_flag = False
 save_S82_flag    = False
 save_COSMOS_flag = False
 
