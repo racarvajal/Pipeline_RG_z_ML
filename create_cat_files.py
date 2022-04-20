@@ -16,7 +16,7 @@ import pandas as pd
 def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     filt_NLAGN = create_MQC_filter(initial_tab, AGN_types[mqc_version])
     imputed_df['is_AGN']      = (np.array(initial_tab['RA_MILLI'] > 0) & filt_NLAGN).astype(int)
-    imputed_df['is_SDSS_gal'] = np.array(initial_tab['class'] == 3)
+    imputed_df['is_SDSS_gal'] = np.array(initial_tab['spCL'] == 'GALAXY')
     imputed_df['is_gal']      = imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']
     return imputed_df
 
