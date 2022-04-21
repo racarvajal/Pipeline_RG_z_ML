@@ -214,3 +214,6 @@ models/*
 
 # Figures created and saved
 plots/*
+
+# Temporary notebooks
+temp_notebooks/*
