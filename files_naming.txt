@@ -1,5 +1,6 @@
 # Names of files and what they do.
 
+conda_environment.yml   File with python packages and dependences to replicate experiments.
 create_cat_files.py     File to create catalogues for running models.
 idx_validation_01.txt   List of indices used for validation set in model 01
 idx_validation_02.txt   List of indices used for validation set in model 02
