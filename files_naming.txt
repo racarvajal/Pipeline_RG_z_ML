@@ -7,3 +7,4 @@ idx_validation_02.txt   List of indices used for validation set in model 02
 ML_01.ipynb             File for training first model for AGN/galaxy classification.
 ML_02.ipynb             File for training second model for AGN/galaxy classification for updated dataset.
 ML_03.ipynb             File for training second model for AGN/galaxy class regression for updated dataset.
+ML_04.ipynb             File for training model for radio detection classification.
