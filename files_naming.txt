@@ -8,4 +8,5 @@ ML_01.ipynb             File for training first model for AGN/galaxy classificat
 ML_02.ipynb             File for training second model for AGN/galaxy classification for updated dataset.
 ML_03.ipynb             File for training second model for AGN/galaxy class regression for updated dataset.
 ML_04.ipynb             File for training model for radio detection classification.
-ML_05.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix.
+ML_05.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for first model.
+ML_06.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model.
