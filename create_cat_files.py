@@ -161,7 +161,7 @@ if run_HETDEX_flag:
     HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z'] # , 'COMMENT']
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']
     clean_cat_HETDEX_df = HETDEX_initial_tab[id_cols].to_pandas()
 
     zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
