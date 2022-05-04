@@ -11,4 +11,4 @@ ML_04.ipynb             File for training model for radio detection classificati
 ML_05.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for first model.
 ML_06.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model.
 ML_07.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model after applying first model.
-ML_08.ipynb             File for training model for radio detection classification without class as feature.
+ML_08.ipynb             File for training model for radio detection classification without class as feature and only for AGN (on GPU).
