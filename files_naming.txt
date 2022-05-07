@@ -13,3 +13,4 @@ ML_06.ipynb             File for analysing distribution of sources and propertie
 ML_07.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model after applying first model.
 ML_08.ipynb             File for training model for radio detection classification without class as feature and only for AGN (on GPU).
 ML_09.ipynb             File for training model for regression of redshift for radio AGN without class as feature (CPU).
+ML_10.ipynb             File for training model for radio detection classification using output from ML_01 to increase training set size.
