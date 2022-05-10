@@ -88,7 +88,7 @@ mqc_version                = '7_4d'  # '7_2' older version
 
 file_path                  = '/mnt/data_raid0_ssd/rcarvajal/ML_QSO/Catalogs/'  # nonius2oal-0-18
 file_name_HETDEX           = f'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
-file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
+file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_SDSS_DR16.fits'  # fits file
 file_name_S82_Ananna       = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_Ananna_17_zsp.fits'  # fits file with additional data from Ananna+2017 and zsp
 # file_name_S82              = file_name_S82_Ananna  # temp fits file with additional data from Ananna+2017 and zsp
 file_name_COSMOS           = f'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
@@ -101,17 +101,17 @@ file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5'
 # file_name_clean_S82_err    = file_name_S82_Ananna.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
 file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
-run_HETDEX_flag = True
-run_S82_flag    = False
-run_COSMOS_flag = False
+run_HETDEX_flag = False
+run_S82_flag    = True
+run_COSMOS_flag = True
 
 run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
 run_COSMOS_errors_flag = False
 
 save_HETDEX_flag = False
-save_S82_flag    = False
-save_COSMOS_flag = False
+save_S82_flag    = True
+save_COSMOS_flag = True
 
 save_HETDEX_errors_flag = False
 save_S82_errors_flag    = False
