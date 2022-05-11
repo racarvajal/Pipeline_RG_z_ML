@@ -207,13 +207,17 @@ Temporary Items
 
 # CatBoost output
 catboost_info/
+catboost_info/*
 
 # Model files
 *.pkl
+models/
 models/*
 
 # Figures created and saved
+plots/
 plots/*
 
 # Temporary notebooks
+temp_notebooks/
 temp_notebooks/*
