@@ -4,6 +4,7 @@ conda_environment.yml   File with python packages and dependences to replicate e
 create_cat_files.py     File to create catalogues for running models.
 idx_validation_01.txt   List of indices used for validation set in model 01
 idx_validation_02.txt   List of indices used for validation set in model 02
+describe_data.ipynb     File with plots and values describing used datasets before ML application.
 ML_01.ipynb             File for training first model for AGN/galaxy classification.
 ML_02.ipynb             File for training second model for AGN/galaxy classification for updated dataset.
 ML_03.ipynb             File for training second model for AGN/galaxy class regression for updated dataset.
