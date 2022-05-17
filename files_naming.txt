@@ -1,27 +1,28 @@
 # Names of files and what they do.
 
-conda_environment.yml   File with python packages and dependences to replicate experiments.
-create_cat_files.py     File to create catalogues for running models.
-idx_validation_01.txt   List of indices used for validation set in model 01
-idx_validation_02.txt   List of indices used for validation set in model 02
-describe_data.ipynb     File with plots and values describing used datasets before ML application.
-flowchart_pipeline.ipynbFile to plot flowchart for full prediction pipeline.
-ML_01.ipynb             File for training first model for AGN/galaxy classification.
-ML_02.ipynb             File for training second model for AGN/galaxy classification for updated dataset.
-ML_03.ipynb             File for training second model for AGN/galaxy class regression for updated dataset.
-ML_04.ipynb             File for training model for radio detection classification using class as feature.
-ML_05.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for first model.
-ML_06.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model.
-ML_07.ipynb             File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model after applying first model.
-ML_08.ipynb             File for training model for radio detection classification without class as feature and only for AGN (on GPU).
-ML_09.ipynb             File for training model for regression of redshift for radio AGN without class as feature (CPU).
-ML_10.ipynb             File for training model for radio detection classification using output from ML_01 to increase training set size.
-ML_11.ipynb             File for training model for regression of redshift for radio AGN without class as feature (CPU) but using AGN and galaxies.
-ML_12.ipynb             File for applying models in series (Pipeline).
-ML_13.ipynb             File for training model for regression of redshift for radio AGN without class as feature (CPU) but using z >= 2 AGN and galaxies.
-ML_14.ipynb             File with plots of sources properties separated by quadrant in AGN prediction confusion matrix
-ML_15.ipynb             File for training model for radio detection classification with predicted and confirmed AGN.
-ML_16.ipynb             File for training model for AGN/galaxy classification with Recall as loss function.
-ML_17.ipynb             File for training model for radio detection classification with predicted and confirmed AGN using Recall as loss function.
-ML_18.ipynb             File for training model for regression of redshift for radio AGN.
-ML_19.ipynb             File for training model for regression of redshift for radio AGN but using z >= 2 AGN.
+conda_environment.yml       File with python packages and dependences to replicate experiments.
+create_cat_files.py         File to create catalogues for running models.
+idx_validation_01.txt       List of indices used for validation set in model 01
+idx_validation_02.txt       List of indices used for validation set in model 02
+idx_validation_radio_01.txt
+describe_data.ipynb         File with plots and values describing used datasets before ML application.
+flowchart_pipeline.ipynb    File to plot flowchart for full prediction pipeline.
+ML_01.ipynb                 File for training first model for AGN/galaxy classification.
+ML_02.ipynb                 File for training second model for AGN/galaxy classification for updated dataset.
+ML_03.ipynb                 File for training second model for AGN/galaxy class regression for updated dataset.
+ML_04.ipynb                 File for training model for radio detection classification using class as feature.
+ML_05.ipynb                 File for analysing distribution of sources and properties over AGN confusion matrix for first model.
+ML_06.ipynb                 File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model.
+ML_07.ipynb                 File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model after applying first model.
+ML_08.ipynb                 File for training model for radio detection classification without class as feature and only for AGN (on GPU).
+ML_09.ipynb                 File for training model for regression of redshift for radio AGN without class as feature (CPU).
+ML_10.ipynb                 File for training model for radio detection classification using output from ML_01 to increase training set size.
+ML_11.ipynb                 File for training model for regression of redshift for radio AGN without class as feature (CPU) but using AGN and galaxies.
+ML_12.ipynb                 File for applying models in series (Pipeline).
+ML_13.ipynb                 File for training model for regression of redshift for radio AGN without class as feature (CPU) but using z >= 2 AGN and galaxies.
+ML_14.ipynb                 File with plots of sources properties separated by quadrant in AGN prediction confusion matrix
+ML_15.ipynb                 File for training model for radio detection classification with predicted and confirmed AGN.
+ML_16.ipynb                 File for training model for AGN/galaxy classification with Recall as loss function.
+ML_17.ipynb                 File for training model for radio detection classification with predicted and confirmed AGN using Recall as loss function.
+ML_18.ipynb                 File for training model for regression of redshift for radio AGN.
+ML_19.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 2 AGN.
