@@ -1,5 +1,6 @@
 # Names of files and what they do.
 
+/
 conda_environment.yml       File with python packages and dependences to replicate experiments.
 create_cat_files.py         File to create catalogues for running models.
 idx_validation_01.txt       List of indices used for validation set in model 01
@@ -26,3 +27,7 @@ ML_16.ipynb                 File for training model for AGN/galaxy classificatio
 ML_17.ipynb                 File for training model for radio detection classification with predicted and confirmed AGN using Recall as loss function.
 ML_18.ipynb                 File for training model for regression of redshift for radio AGN.
 ML_19.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 2 AGN.
+/moc_files
+CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey
+CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey
+CDS-J-AJ-142-3-VLA_STRIPE82_MOC.fits            MOC file for VLA Stripe 82 Survey
