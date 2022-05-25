@@ -17,7 +17,7 @@ def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     filt_NLAGN                = create_MQC_filter(initial_tab, AGN_types[mqc_version])
     imputed_df['is_AGN']      = (np.array(initial_tab['RA_MILLI'] > 0) & filt_NLAGN).astype(int)
     imputed_df['is_SDSS_gal'] = (np.array(initial_tab['spCl'] == 'GALAXY')).astype(int)
-    if run_S82_flag:
+    if run_S82_flag or run_COSMOS_flag:
         imputed_df['is_SDSS_gal'] = ((initial_tab['spCl'] == 'GALAXY') | ((initial_tab['zph'].data > 0) & (initial_tab['spCl'] != 'QSO') & ~(np.array(initial_tab['RA_MILLI'].data > 0) & filt_NLAGN))).astype(int)
         imputed_df['is_SDSS_gal'] = imputed_df['is_SDSS_gal'].fillna(False).astype(int)
     imputed_df['is_gal']      = (imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']).astype(int)
@@ -105,16 +105,16 @@ file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5'
 file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
 run_HETDEX_flag = False
-run_S82_flag    = True
-run_COSMOS_flag = False
+run_S82_flag    = False
+run_COSMOS_flag = True
 
 run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
 run_COSMOS_errors_flag = False
 
 save_HETDEX_flag = False
-save_S82_flag    = True
-save_COSMOS_flag = False
+save_S82_flag    = False
+save_COSMOS_flag = True
 
 save_HETDEX_errors_flag = False
 save_S82_errors_flag    = False
