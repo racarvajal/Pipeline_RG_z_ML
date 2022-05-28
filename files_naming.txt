@@ -28,6 +28,7 @@ ML_17.ipynb                 File for training model for radio detection classifi
 ML_18.ipynb                 File for training model for regression of redshift for radio AGN.
 ML_19.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 2 AGN.
 ML_20.ipynb                 File for SHAP analysis of base models.
+ML_21.ipynb                 File for analysis of scores and metrics of models.
 /moc_files
 CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey
 CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey
