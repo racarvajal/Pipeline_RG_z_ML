@@ -162,7 +162,7 @@ show_plot_flag = True
 # original redshift from source
 orig_z = 0.0422
 
-fig             = plt.figure(figsize=(12,5.5))
+fig             = plt.figure(figsize=(12,4.0))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 
 for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_5sigma_AB, central_pos_width_um)):
@@ -239,7 +239,7 @@ ax1.set_zorder(ax2.get_zorder()+1)
 ax1.set_frame_on(False)
 
 if save_plot_flag:
-    plt.savefig('../../Figures/surveys_depth_HETDEX.pdf')
+    plt.savefig('plots/surveys_depth_HETDEX.pdf')
 if show_plot_flag:
     plt.show()
 if not show_plot_flag:
