@@ -157,7 +157,7 @@ if AGN_sed == 'rest-frame':
 
 # Plot bands and depths
 save_plot_flag = False
-show_plot_flag = True
+show_plot_flag = False
 
 # original redshift from source
 orig_z = 0.0422
