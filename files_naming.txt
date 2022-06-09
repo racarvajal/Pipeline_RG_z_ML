@@ -32,6 +32,7 @@ ML_21.ipynb                 File for analysis of scores and metrics of models.
 ML_22.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 3 AGN.
 ML_23.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 3.7 or 4.0 AGN.
 ML_24.ipynb                 File for training model for regression of redshift for radio AGN but using z >= 3.7 with oversampling smogn.
+ML_25.ipynb                 File for applying pipeline and creating tables for exporting candidates.
 /moc_files
 CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey
 CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey
