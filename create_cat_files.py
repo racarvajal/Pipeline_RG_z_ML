@@ -106,7 +106,7 @@ file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.
 
 run_HETDEX_flag = False
 run_S82_flag    = False
-run_COSMOS_flag = True
+run_COSMOS_flag = False
 
 run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
@@ -114,7 +114,7 @@ run_COSMOS_errors_flag = False
 
 save_HETDEX_flag = False
 save_S82_flag    = False
-save_COSMOS_flag = True
+save_COSMOS_flag = False
 
 save_HETDEX_errors_flag = False
 save_S82_errors_flag    = False
@@ -164,7 +164,7 @@ if run_HETDEX_flag:
     HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']
     clean_cat_HETDEX_df = HETDEX_initial_tab[id_cols].to_pandas()
 
     zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
@@ -274,7 +274,7 @@ if run_S82_flag:
     S82_initial_tab     = fix_dtypes(S82_initial_tab)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']  # zsp for Annana+17
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']  # zsp for Annana+17
     if 'Ananna_17' in file_name_S82:
         id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
                 'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']  # zsp for Annana+17
@@ -388,7 +388,7 @@ if run_S82_errors_flag:
     S82_initial_tab     = fix_dtypes(S82_initial_tab)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']
     clean_cat_S82_err_df = S82_initial_tab[id_cols].to_pandas()
 
     zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
@@ -510,7 +510,7 @@ if run_COSMOS_flag:
         COSMOS_initial_tab[col]   = COSMOS_initial_tab[col].astype(np.str)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']
     clean_cat_COSMOS_df = COSMOS_initial_tab[id_cols].filled().to_pandas()
     
     # fix dtypes
