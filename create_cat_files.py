@@ -18,10 +18,6 @@ def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     imputed_df['is_str']      = (np.array(initial_tab['spCl'] == 'STAR  ')).astype(int)
     imputed_df['is_AGN']      = (np.array(initial_tab['RA_MILLI'] > 0) & filt_NLAGN).astype(int)
     imputed_df['is_SDSS_gal'] = (np.array(initial_tab['spCl'] == 'GALAXY')).astype(int)
-    if run_S82_flag or run_COSMOS_flag:
-        imputed_df['is_SDSS_gal'] = ((initial_tab['spCl'] == 'GALAXY') | ((initial_tab['zph'].data > 0) & (initial_tab['spCl'] != 'QSO   ') &\
-                                                                          ~(np.array(initial_tab['RA_MILLI'].data > 0) & filt_NLAGN))).astype(int)
-        imputed_df['is_SDSS_gal'] = imputed_df['is_SDSS_gal'].fillna(False).astype(int)
     imputed_df['is_gal']      = (imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']).astype(int)
     return imputed_df
 
