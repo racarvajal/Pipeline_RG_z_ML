@@ -157,7 +157,7 @@ if AGN_sed == 'rest-frame':
 
 # Plot bands and depths
 save_plot_flag = False
-show_plot_flag = False
+show_plot_flag = True
 
 # original redshift from source
 orig_z = 0.0422
@@ -212,10 +212,10 @@ AGN_wave_rf = AGN_wave / (1 + orig_z)  # Rest-frame wavelength
 AGN_flux_rf = AGN_flux * (1 + orig_z)**2 * (cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(0.001))**2
 ax2.plot(AGN_wave_rf, AGN_flux_rf * 1e6, zorder=1, color='k', lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
 ax2.plot(AGN_wave, AGN_flux * 1e6, zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
-max_z_plot = 4
+max_z_plot = 2
 # np.abs((np.log10(z) - 2) / (max_z_plot / 2))
-for z in np.logspace(np.log10(0.01), np.log10(max_z_plot), 10):
-    redshift_factor = cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(z)
+for z in np.logspace(np.log10(0.01), np.log10(max_z_plot), 5):
+    redshift_factor = cosmo.luminosity_distance(orig_z).to(u.cm) / cosmo.luminosity_distance(z).to(u.cm)
     ax2.plot(AGN_wave * (1 + z), AGN_flux * 1e6 / (1 + z)**2 * (redshift_factor)**2,\
          zorder=0, color='Gray', lw=1, alpha=np.abs(1 - z / max_z_plot), ls='--')
     ax2.annotate(f'z={z:.2f}', (8e6, (AGN_flux * 1e6 / (1 + z)**2 * (redshift_factor)**2)[-20]),\
