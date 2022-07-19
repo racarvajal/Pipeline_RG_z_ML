@@ -127,44 +127,44 @@ central_pos_width_um = np.array([filt_band_width_wave[key_].value  for key_ in l
 depth_5sigma_AB      = np.array([filt_5sigma_lim_AB[key_].value    for key_ in list(filt_5sigma_lim_AB.keys())])
 depth_5sigma_flux    = np.array([filt_5sigma_lim_flux[key_].value  for key_ in list(filt_5sigma_lim_flux.keys())])
 
-AGN_sed = 'observed'  # 'rest-frame' or 'observed'
+AGN_sed  = 'observed'  # 'rest-frame' or 'observed'
+AGN_name = 'mrk231'  # 'mrk231', '3c273'
 if AGN_sed == 'observed':
     # Load SED from AGN (observed)
     # Mrk 231 
     # The Spectral Energy Distributions of Active Galactic Nuclei
     # Brown et al. (2019)
     # http://dx.doi.org/10.17909/t9-3dbt-8734 
-    file_name = 'hlsp_agnsedatlas_multi_multi_mrk231_multi_v1_spec-obs.txt'
+    file_name = f'hlsp_agnsedatlas_multi_multi_{AGN_name}_multi_v1_spec-obs.txt'
     data_AGN  = np.loadtxt(data_path + file_name, usecols=(0, 1, 2, 3))
-    AGN_wave  = data_AGN[:, 0]  # Observed wavelength (um)
-    AGN_flux  = data_AGN[:, 1]  # f_nu (Jy)
-    # AGN_flux  = data_AGN[:, 2]  # f_lam (erg/s/cm2/A)
-    # Convert f_lam (erg/s/cm2/A) to f_nu (Jy)
-    # AGN_flux = 3.34e4 * (AGN_wave * 1e4)**2 * data_AGN[:, 2]
-if AGN_sed == 'rest-frame':
+    AGN_wave  = data_AGN[:, 0] * u.um  # Observed wavelength (um)
+    AGN_flux  = data_AGN[:, 1] * u.Jy  # f_nu (Jy)
+
+elif AGN_sed == 'rest-frame':
     # Load SED from AGN (rest-frame)
     # Mrk 231 
     # The Spectral Energy Distributions of Active Galactic Nuclei
     # Brown et al. (2019)
     # http://dx.doi.org/10.17909/t9-3dbt-8734
-    file_name = 'hlsp_agnsedatlas_multi_multi_mrk231_multi_v1_spec-rest.txt'
-    data_AGN  = np.loadtxt(data_path + file_name, usecols=(0, 1, 2, 3))
-    AGN_wave  = data_AGN[:, 0] # Column 1: Restframe wavelength (um)
-    AGN_flux  = data_AGN[:, 2] # Column 3: f_lam (erg/s/cm2/A)
+    file_name  = f'hlsp_agnsedatlas_multi_multi_{AGN_name}_multi_v1_spec-rest.txt'
+    data_AGN   = np.loadtxt(data_path + file_name, usecols=(0, 1, 2, 3))
+    AGN_wave   = data_AGN[:, 0] * u.um # Column 1: Restframe wavelength (um)
+    AGN_flux_l = data_AGN[:, 2] * u.erg / u.s / (u.cm)**2 / u.AA # Column 3: f_lam (erg/s/cm2/A)
     # Convert f_lam (erg/s/cm2/A) to f_nu (Jy)
-    AGN_flux = 3.34e4 * (AGN_wave * 1e4)**2 * data_AGN[:, 2]
-
+    AGN_flux   = (AGN_flux_l * AGN_wave**2 / c).to(u.Jy)
 
 # Plot bands and depths
 save_plot_flag = False
 show_plot_flag = True
 
 # original redshift from source
-orig_z = 0.0422
+orig_z = 0.0422  # Mrk231
+# orig_z = 0.1583  # 3C273
 
 fig             = plt.figure(figsize=(12,4.0))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 
+# Plot band limits in magnitude vs wavelength axes
 for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_5sigma_AB, central_pos_width_um)):
     ax1.errorbar(cent_pos, depth, xerr=band_width/2, ls='None', marker='None',\
          ecolor=plt.get_cmap('cet_CET_C6', len(filter_names))(count / len(filter_names)),\
@@ -183,6 +183,7 @@ for count, filt_name in enumerate(filter_names):
 ax1.set_ylim(bottom=-3.5)
 ax1.invert_yaxis()
 
+# Add extra axis in flux units
 ax2      = ax1.twinx()
 lims_AB  = ax1.get_ylim() * u.mag(u.AB)
 lims_uJy = np.array(lims_AB.to(u.uJy).value)
@@ -195,6 +196,7 @@ ax2.tick_params(which='minor', length=4, width=1.5)
 ax2.set_ylabel('$\mathrm{Flux}_{5\sigma\, \mathrm{Depth}}\, [\mu \mathrm{Jy}]$', size=20)
 ax2.set_yscale('log')
 
+# Add extra axis in frequency units
 ax3      = ax1.twiny()
 lims_um  = ax1.get_xlim()
 lims_GHz = c.value * 1e-9 / (np.array(lims_um) * 1e-6)
@@ -208,17 +210,28 @@ ax3.set_xlabel('Frequency [GHz]', size=20)
 ax3.set_xscale('log')
 
 # Add AGN SED
-AGN_wave_rf = AGN_wave / (1 + orig_z)  # Rest-frame wavelength
-AGN_flux_rf = AGN_flux * (1 + orig_z)**2 * (cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(0.001))**2
-ax2.plot(AGN_wave_rf, AGN_flux_rf * 1e6, zorder=1, color='k', lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
-ax2.plot(AGN_wave, AGN_flux * 1e6, zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
+z_zero_proxy         = 1e-2  # closest to z = 0
+redshift_factor_orig = cosmo.luminosity_distance(orig_z).to(u.Mpc).value /\
+                        cosmo.luminosity_distance(z_zero_proxy).to(u.Mpc).value
+if AGN_sed == 'observed':
+    AGN_wave_rf     = AGN_wave * (1 + orig_z)  # Rest-frame wavelength
+    AGN_flux_uJy    = AGN_flux.to(u.uJy)
+    AGN_flux_rf_uJy = AGN_flux_uJy * redshift_factor_orig
+elif AGN_sed == 'rest-frame':
+    AGN_wave_rf     = AGN_wave
+    AGN_wave        = AGN_wave * (1 + orig_z)
+    AGN_flux_rf_uJy = AGN_flux.to(u.uJy)
+    AGN_flux_uJy    = AGN_flux_rf_uJy
+ax2.plot(AGN_wave_rf.value, AGN_flux_rf_uJy.value, zorder=1, color='k', lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
+ax2.plot(AGN_wave.value, AGN_flux_rf_uJy.value / redshift_factor_orig, zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
 max_z_plot = 2
 # np.abs((np.log10(z) - 2) / (max_z_plot / 2))
-for z in np.logspace(np.log10(0.01), np.log10(max_z_plot), 5):
-    redshift_factor = cosmo.luminosity_distance(orig_z).to(u.cm) / cosmo.luminosity_distance(z).to(u.cm)
-    ax2.plot(AGN_wave * (1 + z), AGN_flux * 1e6 / (1 + z)**2 * (redshift_factor)**2,\
+for z in np.logspace(np.log10(z_zero_proxy), np.log10(max_z_plot), 8):
+    print(AGN_flux_uJy)
+    redshift_factor = cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(z)
+    ax2.plot(AGN_wave_rf.value * (1 + z), AGN_flux_uJy.value * (redshift_factor)**2,\
          zorder=0, color='Gray', lw=1, alpha=np.abs(1 - z / max_z_plot), ls='--')
-    ax2.annotate(f'z={z:.2f}', (8e6, (AGN_flux * 1e6 / (1 + z)**2 * (redshift_factor)**2)[-20]),\
+    ax2.annotate(f'z={z:.2f}', (8e6, (AGN_flux_uJy.value * (redshift_factor)**2)[-20]),\
          textcoords='offset points', xytext=(-20, 0), fontsize=7,\
          ha='left', zorder=10, va='bottom', alpha=np.abs(1 - z / max_z_plot))
 ax1.set_xlim(lims_um)
