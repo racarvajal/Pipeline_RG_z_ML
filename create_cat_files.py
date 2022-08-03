@@ -100,8 +100,8 @@ file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5'
 file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
 run_HETDEX_flag = True
-run_S82_flag    = True
-run_COSMOS_flag = True
+run_S82_flag    = False
+run_COSMOS_flag = False
 
 run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
@@ -142,7 +142,7 @@ mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52
 
 mag_cols_for_colours = ['gmag', 'rmag', 'imag', 'zmag', 'ymag', 'Jmag', 'Hmag',\
                         'Kmag', 'W1mproPM', 'W2mproPM', 'W3mag', 'W4mag']
-mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'i',\
+mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'z',\
                         'ymag': 'y', 'Jmag': 'J', 'Hmag': 'H', 'Kmag': 'K',\
                         'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
 
