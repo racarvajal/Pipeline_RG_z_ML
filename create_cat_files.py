@@ -9,6 +9,7 @@
 # ratios, flags, etc.).
 
 import numpy as np
+from itertools import combinations
 from astropy.table import Table
 from astropy import units as u
 import pandas as pd
@@ -21,18 +22,10 @@ def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     imputed_df['is_gal']      = (imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']).astype(int)
     return imputed_df
 
-def create_colours(imputed_df):
-    imputed_df['g_r']     = imputed_df['gmag']     - imputed_df['rmag']
-    imputed_df['r_i']     = imputed_df['rmag']     - imputed_df['imag']
-    imputed_df['i_z']     = imputed_df['imag']     - imputed_df['zmag']
-    imputed_df['z_y']     = imputed_df['zmag']     - imputed_df['ymag']
-    imputed_df['g_i']     = imputed_df['gmag']     - imputed_df['imag']
-    imputed_df['w1_w2']   = imputed_df['W1mproPM'] - imputed_df['W2mproPM']
-    imputed_df['w2_w3']   = imputed_df['W2mproPM'] - imputed_df['W3mag']
-    imputed_df['w3_w4']   = imputed_df['W3mag']    - imputed_df['W4mag']
-    imputed_df['J_H']     = imputed_df['Jmag']     - imputed_df['Hmag']
-    imputed_df['H_K']     = imputed_df['Hmag']     - imputed_df['Kmag']
-    imputed_df['FUV_NUV'] = imputed_df['FUVmag']   - imputed_df['NUVmag']
+def create_colours(imputed_df, mag_list):
+    for mags_pair in combinations(mag_list, 2):
+        colour_name             = mag_names_short[mags_pair[0]] + '_' + mag_names_short[mags_pair[1]]
+        imputed_df[colour_name] = imputed_df[mags_pair[0]] - imputed_df[mags_pair[1]]
     return imputed_df
 
 def create_ratios(imputed_df):
@@ -143,6 +136,12 @@ mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52
                     'ymag': 21.4, 'FUVmag': 20.0, 'NUVmag': 21.0, 'FEP': 57.9, 'Jmag': 17.45,\
                     'Hmag': 17.24, 'Kmag': 16.59}  # Proper (5-sigma) limits
 
+mag_cols_for_colours = ['gmag', 'rmag', 'imag', 'zmag', 'ymag', 'Jmag', 'Hmag',\
+                        'Kmag', 'W1mproPM', 'W2mproPM', 'W3mag', 'W4mag']
+mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'i',\
+                        'ymag': 'y', 'Jmag': 'J', 'Hmag': 'H', 'Kmag': 'K',\
+                        'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
+
 for key in mag_cols_lim_adhoc:
     mag_cols_lim_adhoc[key] = np.float32(mag_cols_lim_adhoc[key])
 for key in mag_cols_lim_5sigma:
@@ -247,10 +246,10 @@ if run_HETDEX_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_HETDEX_df = create_colours(imputed_HETDEX_df)
+    imputed_HETDEX_df = create_colours(imputed_HETDEX_df, mag_cols_for_colours)
 
-    print('Creating magnitude ratios')
-    imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
+    print('Not creating magnitude ratios')
+    # imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
 
     if save_HETDEX_flag:
         print('Joining all tables')
@@ -360,10 +359,10 @@ if run_S82_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_S82_df = create_colours(imputed_S82_df)
+    imputed_S82_df = create_colours(imputed_S82_df, mag_cols_for_colours)
 
-    print('Creating magnitude ratios')
-    imputed_S82_df = create_ratios(imputed_S82_df)
+    print('Not creating magnitude ratios')
+    # imputed_S82_df = create_ratios(imputed_S82_df)
 
     if save_S82_flag:
         print('Joining all tables')
@@ -596,10 +595,10 @@ if run_COSMOS_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_COSMOS_df = create_colours(imputed_COSMOS_df)
+    imputed_COSMOS_df = create_colours(imputed_COSMOS_df, mag_cols_for_colours)
 
-    print('Creating magnitude ratios')
-    imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
+    print('Not creating magnitude ratios')
+    # imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
 
     if save_COSMOS_flag:
         print('Joining all tables')
