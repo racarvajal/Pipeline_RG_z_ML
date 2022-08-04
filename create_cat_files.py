@@ -238,7 +238,7 @@ if run_HETDEX_flag:
     # Create counter of measurements per source (magnitudes)
     print('Creating new features:')
     print('Creating counter of valid measurements')
-    band_count_HETDEX_df = create_band_count(mags_HETDEX_df, magnitude_cols_non_radio, 'band_num')
+    band_count_HETDEX_df = create_band_count(mags_HETDEX_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
     print('Imputing values')
@@ -351,7 +351,7 @@ if run_S82_flag:
     # Create counter of measurements per source (magnitudes)
     print('Creating new features:')
     print('Creating counter of valid measurements')
-    band_count_S82_df = create_band_count(mags_S82_df, magnitude_cols_non_radio, 'band_num')
+    band_count_S82_df = create_band_count(mags_S82_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
     print('Imputing values')
@@ -587,7 +587,7 @@ if run_COSMOS_flag:
     # Create counter of measurements per source (magnitudes)
     print('Creating new features:')
     print('Creating counter of valid measurements')
-    band_count_COSMOS_df = create_band_count(mags_COSMOS_df, magnitude_cols_non_radio, 'band_num')
+    band_count_COSMOS_df = create_band_count(mags_COSMOS_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
     print('Imputing values')
