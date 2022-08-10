@@ -47,9 +47,9 @@ c = 299_792_458 * u.m / u.s
 
 data_path = '../../Catalogs/'
 
-filter_names = ['FUV', 'NUV', 'g', 'r', 'i', 'z', 'y', 'J', 'H', 'Ks',\
-                 'W1-CW', 'W2-CW', 'W3-AW', 'W4-AW', 'VLASS', 'VLAS82',\
-                 'TGSS', 'LoTSS', 'LoLSS']  # Without 'W1-AW', 'W2-AW'
+filter_names = ['g', 'r', 'i', 'z', 'y', 'J', 'H', 'Ks', 'W1-CW',\
+                'W2-CW', 'W3-AW', 'W4-AW', 'VLASS', 'VLAS82', 'TGSS',\
+                'LoTSS', 'LoLSS']  # Without 'W1-AW', 'W2-AW', 'FUVmag', 'NUVmag'
 
 # Limits as quoted from original reference
 filt_initial_sigma = {'FUV': 5, 'NUV': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5,\
@@ -175,12 +175,12 @@ for count, filt_name in enumerate(filter_names):
     if 'W2' in filt_name: centering = 'right'
     if 'W2' in filt_name: centering = 'left'
     if 'y' in filt_name: centering = 'left'
-    if 'NUV' in filt_name: centering = 'left'
+    # if 'NUV' in filt_name: centering = 'left'
     # if 'CW' in filt_name: valign = 'top'
     ax1.annotate(filt_name.replace('-AW', '').replace('-CW', ''), (central_pos_um[count], depth_5sigma_AB[count]),\
          textcoords='offset points', xytext=(-3, 3.5), fontsize=15,\
          ha=centering, path_effects=pe2, zorder=10, va=valign)
-ax1.set_ylim(bottom=-3.5)
+ax1.set_ylim(bottom=-3.5, top=24.5)
 ax1.invert_yaxis()
 
 # Add extra axis in flux units
@@ -227,7 +227,6 @@ ax2.plot(AGN_wave.value, AGN_flux_rf_uJy.value / redshift_factor_orig, zorder=1,
 max_z_plot = 2
 # np.abs((np.log10(z) - 2) / (max_z_plot / 2))
 for z in np.logspace(np.log10(z_zero_proxy), np.log10(max_z_plot), 8):
-    print(AGN_flux_uJy)
     redshift_factor = cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(z)
     ax2.plot(AGN_wave_rf.value * (1 + z), AGN_flux_uJy.value * (redshift_factor)**2,\
          zorder=0, color='Gray', lw=1, alpha=np.abs(1 - z / max_z_plot), ls='--')
@@ -235,7 +234,7 @@ for z in np.logspace(np.log10(z_zero_proxy), np.log10(max_z_plot), 8):
          textcoords='offset points', xytext=(-20, 0), fontsize=7,\
          ha='left', zorder=10, va='bottom', alpha=np.abs(1 - z / max_z_plot))
 ax1.set_xlim(lims_um)
-ax1.set_xlim(left=1e-1, right=1e7)
+ax1.set_xlim(left=3e-1, right=1e7)
 
 ax1.tick_params(which='both', top=False, right=False, direction='in')
 ax1.tick_params(axis='both', which='major', labelsize=14)
