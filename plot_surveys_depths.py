@@ -11,6 +11,7 @@ import matplotlib.patheffects as mpe
 from astropy import units as u
 from astropy.cosmology import FlatLambdaCDM
 import colorcet as cc
+import cmasher as cmr
 import pandas as pd
 import sys
 
@@ -160,6 +161,7 @@ show_plot_flag = True
 # original redshift from source
 orig_z = 0.0422  # Mrk231
 # orig_z = 0.1583  # 3C273
+cmap_bands = 'cmr.pride' # 'cet_CET_C6'
 
 fig             = plt.figure(figsize=(12,4.0))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
@@ -167,7 +169,7 @@ ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 # Plot band limits in magnitude vs wavelength axes
 for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_5sigma_AB, central_pos_width_um)):
     ax1.errorbar(cent_pos, depth, xerr=band_width/2, ls='None', marker='None',\
-         ecolor=plt.get_cmap('cet_CET_C6', len(filter_names))(count / len(filter_names)),\
+         ecolor=plt.get_cmap(cmap_bands, len(filter_names))(count / len(filter_names)),\
               elinewidth=4, path_effects=pe1, zorder=10)
 for count, filt_name in enumerate(filter_names):
     centering = 'center'
