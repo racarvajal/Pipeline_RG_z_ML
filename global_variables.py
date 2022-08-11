@@ -23,6 +23,7 @@ file_S82_Ananna_17 = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILL
 
 # Model file names
 # Stacked models
+star_model         = 'classification_star_no_star_jun_30_2022'
 AGN_gal_model      = 'classification_AGN_galaxy_ago_03_2022'
 radio_model        = 'classification_radio_detect_ago_02_2022'
 full_z_model       = 'regression_z_ago_04_2022'
