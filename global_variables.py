@@ -8,6 +8,7 @@
 cat_path           = '../../Catalogs/'  # relative path to the same directory
 plots_path         = 'plots/'
 models_path        = 'models/'
+preds_path         = 'pred_rAGN/'
 
 # Boolean flags
 use_5sigma         = True  # use files with 5-sigma magnitude imputation
