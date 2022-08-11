@@ -37,9 +37,11 @@ seed               = 42
 
 # Thresholds
 # Naive values
+naive_star_thresh  = 0.5
 naive_AGN_thresh   = 0.5
 naive_radio_thresh = 0.5
 # PR-optimised
+star_thresh        = 0.15688
 AGN_thresh         = 0.44535
 radio_thresh       = 0.500005978
 # Calibrated models
