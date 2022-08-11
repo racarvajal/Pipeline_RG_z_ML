@@ -13,6 +13,7 @@ from itertools import combinations
 from astropy.table import Table
 from astropy import units as u
 import pandas as pd
+import global_variables as gv
 
 def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     filt_NLAGN                = create_MQC_filter(initial_tab, AGN_types[mqc_version])
@@ -82,26 +83,17 @@ def create_radio_detect(imputed_df, initial_tab, radio_cols):
     imputed_df['radio_detect'] = or_in_arrays
     return imputed_df
 
-mqc_version                = '7_4d'  # '7_2' older version, '7_4d'
 
-file_path                  = '/mnt/data_raid0_ssd/rcarvajal/ML_QSO/Catalogs/'  # nonius2oal-0-18
-file_name_HETDEX           = f'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_LOLSS_SDSS_DR16.fits'  # fits file
-file_name_S82              = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_SDSS_DR16.fits'  # fits file
-file_name_S82_Ananna       = f'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_{mqc_version}_ALLWISE_SDSS_DR16_Ananna_17_zsp.fits'  # fits file with additional data from Ananna+2017 and zsp
-# file_name_S82              = file_name_S82_Ananna  # temp fits file with additional data from Ananna+2017 and zsp
-file_name_COSMOS           = f'CatWISE2020_COSMOS_MILLIQUAS_{mqc_version}_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16.fits'  # fits file
-file_name_clean_HETDEX     = file_name_HETDEX.replace('.fits', '_5sigma_imp.h5')      # h5 file
-file_name_clean_S82        = file_name_S82.replace('.fits', '_5sigma_imp.h5')         # h5 file
-# file_name_clean_S82        = file_name_S82_Ananna.replace('fits', 'h5')  # h5 file, temp line
-file_name_clean_COSMOS     = file_name_COSMOS.replace('.fits', '_5sigma_imp.h5')      # h5 file
-file_name_clean_HETDEX_err = file_name_HETDEX.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
-file_name_clean_S82_err    = file_name_S82.replace('.fits', '_err_5sigma_imp.h5')         # h5 file
-# file_name_clean_S82_err    = file_name_S82_Ananna.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
-file_name_clean_COSMOS_err = file_name_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
+file_name_clean_HETDEX_err = gv.fits_HETDEX.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
+file_name_clean_S82_err    = gv.fits_S82.replace('.fits', '_err_5sigma_imp.h5')         # h5 file
+# file_name_clean_S82_err    = gv.fits_S82_Ananna_17.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
+file_name_clean_COSMOS_err = gv.fits_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
 run_HETDEX_flag = False
 run_S82_flag    = False
 run_COSMOS_flag = False
+
+run_S82_full    = True  # True for use all S82 sources. False for using Ananna+17 sample
 
 run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
@@ -159,7 +151,7 @@ if run_HETDEX_flag:
     print('-' * 40)
     print('Working with HETDEX data')
     print('Reading files')
-    HETDEX_initial_tab     = Table.read(file_path + file_name_HETDEX, format='fits')
+    HETDEX_initial_tab     = Table.read(gv.cat_path + gv.fits_HETDEX, format='fits')
 
     print('Fixing dtypes')
     HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
@@ -220,7 +212,7 @@ if run_HETDEX_flag:
     # as host-dominated NLAGN, AGN, or QSO candidates.
     # For MQC 7.2, that means 'N', 'A', 'q'.
     print('Creating flags for AGN/Galaxy/Star classification')
-    imputed_HETDEX_df = create_AGN_gal_flags(HETDEX_initial_tab, imputed_HETDEX_df, AGN_types_list, mqc_version)
+    imputed_HETDEX_df = create_AGN_gal_flags(HETDEX_initial_tab, imputed_HETDEX_df, AGN_types_list, gv.mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
@@ -258,10 +250,9 @@ if run_HETDEX_flag:
     if save_HETDEX_flag:
         print('Joining all tables')
         clean_cat_final_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_HETDEX_df], axis=1)
-        # print(clean_cat_final_df)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
-        clean_cat_final_HETDEX_df.to_hdf(file_path + file_name_clean_HETDEX, key='df')
+        clean_cat_final_HETDEX_df.to_hdf(gv.cat_path + gv.file_HETDEX, key='df')
 
 #######
 
@@ -269,14 +260,18 @@ if run_S82_flag:
     print('-' * 40)
     print('Working with Stripe 82 data')
     print('Reading files')
-    S82_initial_tab     = Table.read(file_path + file_name_S82, format='fits')
+    if run_S82_full:
+        S82_initial_tab     = Table.read(gv.cat_path + gv.fits_S82, format='fits')
+    if not run_S82_full:
+        S82_initial_tab     = Table.read(gv.cat_path + gv.fits_S82_Ananna_17, format='fits')
 
     print('Fixing dtypes')
     S82_initial_tab     = fix_dtypes(S82_initial_tab)
 
-    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']  # zsp for Annana+17
-    if 'Ananna_17' in file_name_S82:
+    if run_S82_full:
+        id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
+                    'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']  # zsp for Annana+17
+    if not run_S82_full:
         id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
                 'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']  # zsp for Annana+17
     clean_cat_S82_df = S82_initial_tab[id_cols].to_pandas()
@@ -333,7 +328,7 @@ if run_S82_flag:
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
     print('Creating flags for AGN/Galaxy/Star classification')
-    imputed_S82_df = create_AGN_gal_flags(S82_initial_tab, imputed_S82_df, AGN_types_list, mqc_version)
+    imputed_S82_df = create_AGN_gal_flags(S82_initial_tab, imputed_S82_df, AGN_types_list, gv.mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
@@ -371,19 +366,18 @@ if run_S82_flag:
     if save_S82_flag:
         print('Joining all tables')
         clean_cat_final_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_S82_df], axis=1)
-
-        # sys.exit()
-
-        # print(clean_cat_final_df)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
-        clean_cat_final_S82_df.to_hdf(file_path + file_name_clean_S82, key='df')
+        if run_S82_full:
+            clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82, key='df')
+        if not run_S82_full:
+            clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82_Ananna_17, key='df')
 
 if run_S82_errors_flag:
     print('-' * 40)
     print('Working with Stripe 82 data uncertainties')
     print('Reading files')
-    S82_initial_tab     = Table.read(file_path + file_name_S82, format='fits')
+    S82_initial_tab     = Table.read(gv.cat_path + gv.fits_S82, format='fits')
 
     print('Fixing dtypes')
     S82_initial_tab     = fix_dtypes(S82_initial_tab)
@@ -485,14 +479,9 @@ if run_S82_errors_flag:
     if save_S82_errors_flag:
         print('Joining all tables')
         clean_cat_final_S82_err_df = pd.concat([clean_cat_S82_err_df, imputed_errs_S82_df], axis=1)
-
-        # sys.exit()
-
-        # print(clean_cat_final_S82_err_df)
         # save new catalogue to a hdf5 file (.h5)
-    
         print('Saving final table to file')
-        clean_cat_final_S82_err_df.to_hdf(file_path + file_name_clean_S82_err, key='df')
+        clean_cat_final_S82_err_df.to_hdf(gv.cat_path + file_name_clean_S82_err, key='df')
 
 
 #######
@@ -501,7 +490,7 @@ if run_COSMOS_flag:
     print('-' * 40)
     print('Working with COSMOS Field data')
     print('Reading files')
-    COSMOS_initial_tab     = Table.read(file_path + file_name_COSMOS, format='fits')
+    COSMOS_initial_tab     = Table.read(gv.cat_path + gv.fits_COSMOS, format='fits')
 
     print('Fixing dtypes')
     COSMOS_initial_tab     = fix_dtypes(COSMOS_initial_tab)
@@ -569,7 +558,7 @@ if run_COSMOS_flag:
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
     print('Creating flags for AGN/Galaxy/Star classification')
-    imputed_COSMOS_df = create_AGN_gal_flags(COSMOS_initial_tab, imputed_COSMOS_df, AGN_types_list, mqc_version)
+    imputed_COSMOS_df = create_AGN_gal_flags(COSMOS_initial_tab, imputed_COSMOS_df, AGN_types_list, gv.mqc_version)
 
     # Remove columns with too high numbe of missing values
     print('Removing columns with high nullity')
@@ -607,12 +596,6 @@ if run_COSMOS_flag:
     if save_COSMOS_flag:
         print('Joining all tables')
         clean_cat_final_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_COSMOS_df], axis=1)
-
-        # sys.exit()
-        # print(clean_cat_final_COSMOS_df.loc[:20, 'TYPE'])
-
-        # print(clean_cat_final_df)
         # save new catalogue to a hdf5 file (.h5)
-    
         print('Saving final table to file')
-        clean_cat_final_COSMOS_df.to_hdf(file_path + file_name_clean_COSMOS, key='df')
+        clean_cat_final_COSMOS_df.to_hdf(gv.cat_path + gv.file_COSMOS, key='df')

@@ -14,6 +14,7 @@ import colorcet as cc
 import cmasher as cmr
 import pandas as pd
 import sys
+import global_variables as gv
 
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Tcmb0=2.725 * u.K, Om0=0.3)
 
@@ -45,8 +46,6 @@ pe2            = [mpe.Stroke(linewidth=2.0, foreground='white'),
                   mpe.Normal()]
 
 c = 299_792_458 * u.m / u.s
-
-data_path = '../../Catalogs/'
 
 filter_names = ['g', 'r', 'i', 'z', 'y', 'J', 'H', 'Ks', 'W1-CW',\
                 'W2-CW', 'W3-AW', 'W4-AW', 'VLASS', 'VLAS82', 'TGSS',\
@@ -137,7 +136,7 @@ if AGN_sed == 'observed':
     # Brown et al. (2019)
     # http://dx.doi.org/10.17909/t9-3dbt-8734 
     file_name = f'hlsp_agnsedatlas_multi_multi_{AGN_name}_multi_v1_spec-obs.txt'
-    data_AGN  = np.loadtxt(data_path + file_name, usecols=(0, 1, 2, 3))
+    data_AGN  = np.loadtxt(gv.cat_path + file_name, usecols=(0, 1, 2, 3))
     AGN_wave  = data_AGN[:, 0] * u.um  # Observed wavelength (um)
     AGN_flux  = data_AGN[:, 1] * u.Jy  # f_nu (Jy)
 
@@ -148,7 +147,7 @@ elif AGN_sed == 'rest-frame':
     # Brown et al. (2019)
     # http://dx.doi.org/10.17909/t9-3dbt-8734
     file_name  = f'hlsp_agnsedatlas_multi_multi_{AGN_name}_multi_v1_spec-rest.txt'
-    data_AGN   = np.loadtxt(data_path + file_name, usecols=(0, 1, 2, 3))
+    data_AGN   = np.loadtxt(gv.cat_path + file_name, usecols=(0, 1, 2, 3))
     AGN_wave   = data_AGN[:, 0] * u.um # Column 1: Restframe wavelength (um)
     AGN_flux_l = data_AGN[:, 2] * u.erg / u.s / (u.cm)**2 / u.AA # Column 3: f_lam (erg/s/cm2/A)
     # Convert f_lam (erg/s/cm2/A) to f_nu (Jy)
@@ -253,7 +252,7 @@ ax1.set_zorder(ax2.get_zorder()+1)
 ax1.set_frame_on(False)
 
 if save_plot_flag:
-    plt.savefig('plots/surveys_depth_HETDEX.pdf')
+    plt.savefig(gv.plots_path + 'surveys_depth_HETDEX.pdf')
 if show_plot_flag:
     plt.show()
 if not show_plot_flag:
