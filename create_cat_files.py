@@ -22,6 +22,7 @@ def create_AGN_gal_flags(initial_tab, imputed_df, AGN_types, mqc_version):
     tmp_AGN_1                 = np.array((initial_tab['Z'] * 10) % 1 == 0)  # non spec z only
     tmp_AGN_2                 = np.array([(st.startswith('B') | st.startswith('R') |
                                   st.startswith('X') | st.startswith('2')) for st in initial_tab['TYPE']])
+    imputed_df['is_SDSS_QSO'] = (np.array(initial_tab['spCl'] == 'QSO   ')).astype(int)
     imputed_df['is_AGN']      = (tmp_AGN_0 & ~(tmp_AGN_1 & tmp_AGN_2) & filt_NLAGN).astype(int)
     imputed_df['is_SDSS_gal'] = (np.array(initial_tab['spCl'] == 'GALAXY')).astype(int)
     imputed_df['is_gal']      = (imputed_df['is_SDSS_gal'] & ~imputed_df['is_AGN']).astype(int)
