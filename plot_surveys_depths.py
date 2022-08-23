@@ -7,13 +7,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import matplotlib.patheffects as mpe
 from astropy import units as u
 from astropy.cosmology import FlatLambdaCDM
 import colorcet as cc
 import cmasher as cmr
 import pandas as pd
-import sys
 import global_variables as gv
 import global_functions as gf
 
