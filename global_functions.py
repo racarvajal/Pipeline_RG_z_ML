@@ -192,7 +192,7 @@ def get_base_estimators_models(pycaret_pipeline):
     return estimators_
 
 # Run data through previous steps of pipeline
-def preprocess_data(pycaret_pipeline, data_df, base_models_names):
+def preprocess_data(pycaret_pipeline, data_df, base_models_names, verbose=False):
     processed_data = data_df.loc[:, get_final_column_names(pycaret_pipeline, data_df)].copy()
     processed_idx_data  = processed_data.index
     # processed_cols_data  = processed_data.columns
@@ -200,7 +200,6 @@ def preprocess_data(pycaret_pipeline, data_df, base_models_names):
     if len(base_models_names) > 1:
         for est_name in base_models_names[1::]:
             processed_cols_data = processed_cols_data.insert(0, est_name)
-    
     if isinstance(pycaret_pipeline, skp.Pipeline):
         prep_steps = pycaret_pipeline.named_steps.items()
     else:
@@ -208,7 +207,8 @@ def preprocess_data(pycaret_pipeline, data_df, base_models_names):
 
     for (name, method) in prep_steps:
         if method != 'passthrough':  # and name != 'trained_model':
-            print(f'Running {name}')
+            if verbose:
+                print(f'Running {name}')
             processed_data = method.transform(processed_data)
     processed_data_df = pd.DataFrame(processed_data, columns=processed_cols_data, index=processed_idx_data)
     return processed_data_df
