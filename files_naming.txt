@@ -1,8 +1,12 @@
 # Names of files and what they do.
 
 /
+files_naming.txt                    This file. Description of files in project.
+README.md                           Overall description of project.
 conda_environment.yml       		File with python packages and dependences to replicate experiments.
 create_cat_files.py         		File to create catalogues for running models.
+global_functions.py                 File with definitions for functions used in other files.
+global_variables.py                 File with declarations of variables used in other files.
 
 describe_data.ipynb         		File with plots and values describing used datasets before ML application.
 flowchart_pipeline.ipynb    		File to plot flowchart for full prediction pipeline.
@@ -22,12 +26,14 @@ ML_12.ipynb                 		File for applying pipeline and creating tables for
 ML_13.ipynb                 		File for plotting trees and decisions of models.
 ML_14.ipynb                 		File for plotting distribution of transformed features (for each model and dataset).
 
+/moc_files                                      MOC files.
+CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey.
+CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey.
+CDS-J-AJ-142-3-VLA_STRIPE82_MOC.fits            MOC file for VLA Stripe 82 Survey.
 
-idx_validation_01.txt       		List of indices used for validation set in model 01
-idx_validation_02.txt       		List of indices used for validation set in model 02
-idx_validation_radio_01.txt
+/plots                                          Folder for output plots.
 
-/moc_files
-CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey
-CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey
-CDS-J-AJ-142-3-VLA_STRIPE82_MOC.fits            MOC file for VLA Stripe 82 Survey
+/pred_rAGN                                      Folder with predicted catalogues of rAGN.
+predicted_rAGN_COSMOS.csv                       Predicted rAGN in COSMOS field.
+predicted_rAGN_HETDEX.csv                       Predicted rAGN in HETDEX field.
+predicted_rAGN_S82.csv                          Predicted rAGN in Stripe 82 field.
