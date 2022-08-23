@@ -15,6 +15,7 @@ import cmasher as cmr
 import pandas as pd
 import sys
 import global_variables as gv
+import global_functions as gf
 
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Tcmb0=2.725 * u.K, Om0=0.3)
 
@@ -36,14 +37,6 @@ def magToFlux(mag_name, mag_unit) -> u.quantity.Quantity:
 def FluxLimToSigma(flux_lim, old_sigma, new_sigma) -> u.quantity.Quantity:
     flux_sigma = flux_lim / old_sigma * new_sigma
     return flux_sigma
-
-# Path effects for matplotlib
-pe1            = [mpe.Stroke(linewidth=5.0, foreground='black'),
-                  mpe.Stroke(foreground='white', alpha=1),
-                  mpe.Normal()]
-pe2            = [mpe.Stroke(linewidth=2.0, foreground='white'),
-                  mpe.Stroke(foreground='white', alpha=1),
-                  mpe.Normal()]
 
 c = 299_792_458 * u.m / u.s
 
@@ -169,7 +162,7 @@ ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_5sigma_AB, central_pos_width_um)):
     ax1.errorbar(cent_pos, depth, xerr=band_width/2, ls='None', marker='None',\
          ecolor=plt.get_cmap(cmap_bands, len(filter_names))(count / len(filter_names)),\
-              elinewidth=4, path_effects=pe1, zorder=10)
+              elinewidth=4, path_effects=gf.pe1, zorder=10)
 for count, filt_name in enumerate(filter_names):
     centering = 'center'
     valign    = 'bottom'
@@ -180,7 +173,7 @@ for count, filt_name in enumerate(filter_names):
     # if 'CW' in filt_name: valign = 'top'
     ax1.annotate(filt_name.replace('-AW', '').replace('-CW', ''), (central_pos_um[count], depth_5sigma_AB[count]),\
          textcoords='offset points', xytext=(-3, 3.5), fontsize=15,\
-         ha=centering, path_effects=pe2, zorder=10, va=valign)
+         ha=centering, path_effects=gf.pe2, zorder=10, va=valign)
 ax1.set_ylim(bottom=-3.5, top=24.5)
 ax1.invert_yaxis()
 
