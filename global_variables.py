@@ -56,3 +56,8 @@ cal_AGN_thresh     = 0.38261
 cal_radio_thresh   = 0.31594
 # High redshift limit
 high_z_limit       = 3.6
+
+# Colours and colormaps
+cmap_shap          = 'cmr.guppy'  # cmr.pride, cet_CET_R3 cmr.wildfire cmr.guppy
+cmap_conf_matr     = 'cet_dimgray_r'
+cmap_z_plots       = 'cet_linear_kryw_5_100_c64_r'

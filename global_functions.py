@@ -7,6 +7,8 @@
 # Initial imports
 import numpy as np
 import pandas as pd
+import shap
+import copy
 import sklearn.pipeline as skp
 from sklearn.metrics import ConfusionMatrixDisplay
 from astropy.visualization import LogStretch, PowerStretch
@@ -189,25 +191,48 @@ def get_base_estimators_models(pycaret_pipeline):
         estimators_  = pycaret_pipeline.estimators_
     return estimators_
 
+# Run data through previous steps of pipeline
+def preprocess_data(pycaret_pipeline, data_df, base_models_names):
+    processed_data = data_df.loc[:, get_final_column_names(pycaret_pipeline, data_df)].copy()
+    processed_idx_data  = processed_data.index
+    # processed_cols_data  = processed_data.columns
+    processed_cols_data = processed_data.columns.insert(0, base_models_names[0])
+    if len(base_models_names) > 1:
+        for est_name in base_models_names[1::]:
+            processed_cols_data = processed_cols_data.insert(0, est_name)
+    
+    if isinstance(pycaret_pipeline, skp.Pipeline):
+        prep_steps = pycaret_pipeline.named_steps.items()
+    else:
+        prep_steps = pyc.get_config('prep_pipe').named_steps.items()
+
+    for (name, method) in prep_steps:
+        if method != 'passthrough':  # and name != 'trained_model':
+            print(f'Running {name}')
+            processed_data = method.transform(processed_data)
+    processed_data_df = pd.DataFrame(processed_data, columns=processed_cols_data, index=processed_idx_data)
+    return processed_data_df
+
 # Sorted feature importances
-def feat_importances_base_models():
+def feat_importances_base_models(base_models_names, base_models, transformed_data_df):
     coef_sorted_base_df = {}
+    feat_names = transformed_data_df.columns.drop(base_models_names)
     for model, model_fit in zip(base_models_names, base_models):
         if hasattr(model_fit, 'feature_importances_'):
-            coef_base_df = pd.DataFrame({'Feature': extended_cols_AGN.drop(base_models_names),
+            coef_base_df = pd.DataFrame({'Feature': feat_names,
                                          'Importance': model_fit.feature_importances_})
             coef_sorted_base_df[model] = (
             coef_base_df.sort_values(by='Importance', ascending=False)
-            .head(len(extended_cols_AGN.drop(base_models_names)))
+            .head(len(feat_names))
             .sort_values(by='Importance', ascending=False).reset_index(drop=True)
             )
         elif hasattr(model_fit, 'coef_'):
-            coef_base_df = pd.DataFrame({'Feature': extended_cols_AGN.drop(base_models_names),
+            coef_base_df = pd.DataFrame({'Feature': feat_names,
                                          'Importance': np.abs(model_fit.coef_.ravel()) *\
-                                         extended_data_AGN_df.loc[:, extended_cols_AGN.drop(base_models_names)].std(axis=0)})
+                                         transformed_data_df.loc[:, feat_names].std(axis=0)})
             coef_sorted_base_df[model] = (
             coef_base_df.sort_values(by='Importance', ascending=False)
-            .head(len(extended_cols_AGN.drop(base_models_names)))
+            .head(len(feat_names))
             .sort_values(by='Importance', ascending=False).reset_index(drop=True)
             )
     return coef_sorted_base_df
@@ -267,7 +292,7 @@ class MidpointNormalize(mcolors.Normalize):
         return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
 
 # Plot confusion matrix
-def plot_conf_mat(confusion_matrix, title, axin, display_labels=['0', '1'], cmap='cet_dimgray_r', show_clb=False, log_stretch=False):
+def plot_conf_mat(confusion_matrix, title, axin, display_labels=['0', '1'], cmap=gv.cmap_conf_matr, show_clb=False, log_stretch=False):
     disp = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix, display_labels=display_labels)
 
     if log_stretch:
@@ -303,7 +328,7 @@ def plot_conf_mat(confusion_matrix, title, axin, display_labels=['0', '1'], cmap
     return axin
 
 # Plot true and estimated/predicted redshifts
-def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap='cet_linear_kryw_5_100_c64_r', show_clb=False, log_stretch=False):
+def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap=gv.cmap_z_plots, show_clb=False, log_stretch=False):
     if log_stretch:
         norm = ImageNormalize(vmin=0., stretch=LogStretch())
     if not log_stretch:
@@ -359,3 +384,59 @@ def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap=
     ax_pre.set_title(title)
     plt.tight_layout()
     return ax_pre
+
+# Plot SHAP beeswarm
+def plot_shap_beeswarm(pred_type, model_name, shap_values, cmap=gv.cmap_shap, ax_factor=0.75, base_meta=''):
+    if np.ndim(shap_values.values) == 2:
+        shap.plots.beeswarm(copy.deepcopy(shap_values), log_scale=False, show=False, color_bar=False,
+                            color=plt.get_cmap(cmap), max_display=len(shap_values.feature_names), alpha=1.0)
+    elif np.ndim(shap_values.values) > 2:
+        shap.plots.beeswarm(copy.deepcopy(shap_values)[:, :, 1], log_scale=False, show=False, color_bar=False,
+                            color=plt.get_cmap(cmap), max_display=len(shap_values.feature_names), alpha=1.0)
+    _, h = plt.gcf().get_size_inches()
+    m  = cm.ScalarMappable(cmap=cmap)
+    cb = plt.colorbar(m, ticks=[0, 1], aspect=100)
+    cb.set_ticklabels([shap.plots._labels.labels['FEATURE_VALUE_LOW'], shap.plots._labels.labels['FEATURE_VALUE_HIGH']])
+    cb.set_label(shap.plots._labels.labels["FEATURE_VALUE"], size=16, labelpad=-20)
+    cb.ax.tick_params(labelsize=16, length=0)
+    cb.set_alpha(1)
+    cb.outline.set_visible(False)
+    bbox = cb.ax.get_window_extent().transformed(plt.gcf().dpi_scale_trans.inverted())
+    plt.gca().tick_params('x', labelsize=14)
+    plt.gca().xaxis.get_offset_text().set_fontsize(14)
+    plt.gca().xaxis.get_offset_text().set_position((0,1))
+    plt.gca().tick_params('y', labelsize=20)
+    plt.gca().xaxis.label.set_size(20)
+    plt.title(f'{pred_type}: {base_meta}-learner - {model_name}', fontsize=16)
+    plt.gcf().set_size_inches(h * ax_factor, h * ax_factor *3/2)
+    plt.tight_layout()
+
+# Plot SHAP decision
+def plot_shap_decision(pred_type, model_name, shap_values, shap_explainer, col_names, ax, link, cmap=gv.cmap_shap, new_base_value=None, base_meta='', xlim=None):
+    if np.ndim(shap_values.values) == 2:
+        shap.plots.decision(base_value=shap_explainer.expected_value,
+                            shap_values=shap_values.values,
+                            feature_names=col_names.to_list(),
+                            link=link, plot_color=plt.get_cmap(cmap),
+                            highlight=None, auto_size_plot=False,
+                            show=False, xlim=xlim,
+                            feature_display_range=slice(-1, -(len(shap_values.feature_names) +1), -1),
+                            new_base_value=new_base_value)
+    if np.ndim(shap_values.values) > 2:
+        shap.plots.decision(base_value=shap_explainer.expected_value[-1],
+                            shap_values=(shap_values.values)[:, :, 1],
+                            feature_names=col_names.to_list(),
+                            link=link, plot_color=plt.get_cmap(cmap),
+                            highlight=None, auto_size_plot=False,
+                            show=False, xlim=None,
+                            feature_display_range=slice(-1, -(len(shap_values.feature_names) +1), -1),
+                            new_base_value=new_base_value)
+    ax.tick_params('x', labelsize=14)
+    ax.xaxis.get_offset_text().set_fontsize(14)
+    #ax1.xaxis.get_offset_text().set_position((0,1))
+    ax.tick_params('y', labelsize=20)
+    # plt.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+    ax.xaxis.label.set_size(20)
+    plt.title(f'{pred_type}: {base_meta}-learner - {model_name}', fontsize=16)
+    plt.tight_layout()
+    return ax
