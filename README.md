@@ -21,5 +21,5 @@ Datasets are located in the relative path (not available in this repository):
 
     ../../Catalogs/
 
-Description of most files and folders can be seen in files_naming.txt.
+Description of most files and folders can be seen in `files_naming.txt`.
 Plots and images are not included in this repository.
