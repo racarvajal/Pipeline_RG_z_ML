@@ -3,42 +3,30 @@
 /
 conda_environment.yml       		File with python packages and dependences to replicate experiments.
 create_cat_files.py         		File to create catalogues for running models.
+
+describe_data.ipynb         		File with plots and values describing used datasets before ML application.
+flowchart_pipeline.ipynb    		File to plot flowchart for full prediction pipeline.
+
+ML_01.ipynb                 		File for training model for star/no-star classification with Recall as loss function.
+ML_02.ipynb                 		File for training model for AGN/galaxy classification with Recall as loss function.
+ML_03.ipynb                 		File for training model for radio detection classification on confirmed AGN using Recall as loss function.
+ML_04.ipynb                 		File for training model for regression of redshift for confirmed radio AGN.
+ML_05.ipynb                 		File for training model for regression of redshift for confirmed radio AGN using z >= 3.7 and oversampling smogn.
+ML_06.ipynb                 		File for applying models in series (Pipeline) with optimised thresholds.
+ML_07.ipynb                 		File for applying models in series (Pipeline) with naive thresholds (same as ML_06).
+ML_08.ipynb                 		File with plots of sources properties separated by quadrant in AGN prediction confusion matrix
+ML_09.ipynb                 		File for SHAP analysis of META models for high-z or random predicted sources.
+ML_10.ipynb                 		File for SHAP analysis of BASE models for high-z or random predicted sources.
+ML_11.ipynb                 		File for analysis of scores and metrics of models.
+ML_12.ipynb                 		File for applying pipeline and creating tables for exporting candidates.
+ML_13.ipynb                 		File for plotting trees and decisions of models.
+ML_14.ipynb                 		File for plotting distribution of transformed features (for each model and dataset).
+
+
 idx_validation_01.txt       		List of indices used for validation set in model 01
 idx_validation_02.txt       		List of indices used for validation set in model 02
 idx_validation_radio_01.txt
-describe_data.ipynb         		File with plots and values describing used datasets before ML application.
-flowchart_pipeline.ipynb    		File to plot flowchart for full prediction pipeline.
-ML_01.ipynb                 		File for training first model for AGN/galaxy classification.
-ML_02.ipynb                 		File for training second model for AGN/galaxy classification for updated dataset.
-ML_03.ipynb                 		File for training second model for AGN/galaxy class regression for updated dataset.
-ML_04.ipynb                 		File for training model for radio detection classification using class as feature.
-ML_05.ipynb                 		File for analysing distribution of sources and properties over AGN confusion matrix for first model.
-ML_06.ipynb                 		File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model.
-ML_07.ipynb                 		File for analysing distribution of sources and properties over AGN confusion matrix for second classfication model after applying first model.
-ML_08.ipynb                 		File for training model for radio detection classification without class as feature and only for AGN (on GPU).
-ML_09.ipynb                 		File for training model for regression of redshift for radio AGN without class as feature (CPU).
-ML_10.ipynb                 		File for training model for radio detection classification using output from ML_01 to increase training set size.
-ML_11.ipynb                 		File for training model for regression of redshift for radio AGN without class as feature (CPU) but using AGN and galaxies.
-ML_12.ipynb                 		File for applying models in series (Pipeline).
-ML_13.ipynb                 		File for training model for regression of redshift for radio AGN without class as feature (CPU) but using z >= 2 AGN and galaxies.
-ML_14.ipynb                 		File with plots of sources properties separated by quadrant in AGN prediction confusion matrix
-ML_15.ipynb                 		File for training model for radio detection classification with predicted and confirmed AGN.
-ML_16.ipynb                 		File for training model for AGN/galaxy classification with Recall as loss function.
-ML_17.ipynb                 		File for training model for radio detection classification with predicted and confirmed AGN using Recall as loss function.
-ML_18.ipynb                 		File for training model for regression of redshift for radio AGN.
-ML_19.ipynb                 		File for training model for regression of redshift for radio AGN but using z >= 2 AGN.
-ML_20.ipynb                 		File for SHAP analysis of META models.
-ML_21.ipynb                 		File for analysis of scores and metrics of models.
-ML_22.ipynb                 		File for training model for regression of redshift for radio AGN but using z >= 3 AGN.
-ML_23.ipynb                 		File for training model for regression of redshift for radio AGN but using z >= 3.7 or 4.0 AGN.
-ML_24.ipynb                 		File for training model for regression of redshift for radio AGN but using z >= 3.7 with oversampling smogn.
-ML_25.ipynb                 		File for applying pipeline and creating tables for exporting candidates.
-ML_26.ipynb                 		File for training model for star/no-star classification with Recall as loss function.
-ML_27.ipynb                 		File for SHAP analysis of META models for high-z sources.
-ML_28.ipynb                 		File for SHAP analysis of BASE models for high-z or random predicted sources.
-ML_29.ipynb                 		File for plotting trees and decisions of models.
-ML_30.ipynb                 		File for plotting distribution of transformed features (for each model and dataset).
-ML_31.ipynb                 		File for applying models in series (Pipeline) with naive thresholds (same as ML_12).
+
 /moc_files
 CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey
 CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits              MOC file for LoTSS DR1 Survey
