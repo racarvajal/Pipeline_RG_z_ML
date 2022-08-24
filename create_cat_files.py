@@ -84,6 +84,13 @@ def create_radio_detect(imputed_df, initial_tab, radio_cols):
     imputed_df['radio_detect'] = or_in_arrays
     return imputed_df
 
+def create_imputation_count(mags_df, magnitude_cols, magnitude_limits, feat_name):
+    imputation_count_df            = pd.DataFrame()
+    imputation_bool_df             = pd.DataFrame()
+    for mag in magnitude_cols:
+        imputation_bool_df[mag]    = np.array(mags_df.loc[:, mag] == magnitude_limits[mag]).astype(int)
+    imputation_count_df[feat_name] = imputation_bool_df.sum(axis=1)
+    return imputation_count_df
 
 file_name_clean_HETDEX_err = gv.fits_HETDEX.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 file_name_clean_S82_err    = gv.fits_S82.replace('.fits', '_err_5sigma_imp.h5')         # h5 file
@@ -140,7 +147,7 @@ mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'z',\
                         'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
 
 for key in mag_cols_lim_adhoc:
-    mag_cols_lim_adhoc[key] = np.float32(mag_cols_lim_adhoc[key])
+    mag_cols_lim_adhoc[key]  = np.float32(mag_cols_lim_adhoc[key])
 for key in mag_cols_lim_5sigma:
     mag_cols_lim_5sigma[key] = np.float32(mag_cols_lim_5sigma[key])
 
@@ -247,10 +254,14 @@ if run_HETDEX_flag:
 
     print('Not creating magnitude ratios')
     # imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
+    
+    # Create counter of imputed measurements per source (magnitudes)
+    print('Creating counter of valid measurements')
+    imputed_count_HETDEX_df = create_imputation_count(imputed_HETDEX_df, mag_cols_for_colours, mag_cols_lim['5sigma'], 'num_imputed')
 
     if save_HETDEX_flag:
         print('Joining all tables')
-        clean_cat_final_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_HETDEX_df], axis=1)
+        clean_cat_final_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_count_HETDEX_df, imputed_HETDEX_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
         clean_cat_final_HETDEX_df.to_hdf(gv.cat_path + gv.file_HETDEX, key='df')
@@ -363,10 +374,14 @@ if run_S82_flag:
 
     print('Not creating magnitude ratios')
     # imputed_S82_df = create_ratios(imputed_S82_df)
+    
+    # Create counter of imputed measurements per source (magnitudes)
+    print('Creating counter of valid measurements')
+    imputed_count_S82_df = create_imputation_count(imputed_S82_df, mag_cols_for_colours, mag_cols_lim['5sigma'], 'num_imputed')
 
     if save_S82_flag:
         print('Joining all tables')
-        clean_cat_final_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_S82_df], axis=1)
+        clean_cat_final_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_count_S82_df, imputed_S82_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
         if run_S82_full:
@@ -593,10 +608,14 @@ if run_COSMOS_flag:
 
     print('Not creating magnitude ratios')
     # imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
+    
+    # Create counter of imputed measurements per source (magnitudes)
+    print('Creating counter of valid measurements')
+    imputed_count_COSMOS_df = create_imputation_count(imputed_COSMOS_df, mag_cols_for_colours, mag_cols_lim['5sigma'], 'num_imputed')
 
     if save_COSMOS_flag:
         print('Joining all tables')
-        clean_cat_final_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_COSMOS_df], axis=1)
+        clean_cat_final_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_count_COSMOS_df, imputed_COSMOS_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
         clean_cat_final_COSMOS_df.to_hdf(gv.cat_path + gv.file_COSMOS, key='df')
