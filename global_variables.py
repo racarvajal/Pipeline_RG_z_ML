@@ -36,6 +36,7 @@ radio_model        = 'classification_radio_detect_ago_02_2022'
 full_z_model       = 'regression_z_ago_04_2022'
 high_z_model       = 'regression_z_jul_19_2022'
 # Calibrated models
+cal_str_model      = 'cal_classification_star_no_star_ago_25_2022.joblib'
 cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_03_2022.joblib'
 cal_radio_model    = 'cal_classification_radio_detect_ago_02_2022.joblib'
 
@@ -55,7 +56,7 @@ radio_thresh       = 0.500005978
 cal_AGN_thresh     = 0.34611
 cal_radio_thresh   = 0.32799
 # High redshift limit
-high_z_limit       = 3.6
+high_z_limit       = 2.0  # 3.6
 
 # Colours and colormaps
 cmap_shap          = 'cmr.guppy'  # cmr.pride, cet_CET_R3 cmr.wildfire cmr.guppy
