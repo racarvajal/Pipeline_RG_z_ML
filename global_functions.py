@@ -261,6 +261,71 @@ def feat_importances_meta_model(pycaret_pipeline, transformed_data_df):
     )
     return coef_sorted_meta_df
 
+# Obtain hyperparameters values after optimisation
+def obtain_optimised_hyperpars(pycaret_pipeline, meta_model_name, pred_type='classification'):
+    base_names            = get_base_estimators_names(pycaret_pipeline)
+    base_models           = get_base_estimators_models(pycaret_pipeline)
+    # Optimised params from meta model
+    try:
+        if isinstance(pycaret_pipeline, skp.Pipeline):
+            all_meta_params   = pycaret_pipeline['trained_model'].final_estimator_.get_all_params()
+        else:
+            all_meta_params   = pycaret_pipeline.final_estimator_.get_all_params()
+    except:
+        if isinstance(pycaret_pipeline, skp.Pipeline):
+            all_meta_params   = pycaret_pipeline['trained_model'].final_estimator_.get_params()
+        else:
+            all_meta_params   = pycaret_pipeline.final_estimator_.get_params()
+    model_params_opt_meta = {}
+    if pred_type == 'classification':
+        for key in pyc.models(internal=True).loc[meta_model_name]['Tune Grid'].keys():
+            try:
+                model_params_opt_meta[key] = all_meta_params[key]
+            except:
+                if key == 'eta':
+                    model_params_opt_meta['learning_rate'] = all_meta_params['learning_rate']
+    if pred_type == 'regression':
+        for key in pyr.models(internal=True).loc[meta_model_name]['Tune Grid'].keys():
+            try:
+                model_params_opt_meta[key] = all_meta_params[key]
+            except:
+                if key == 'eta':
+                    model_params_opt_meta['learning_rate'] = all_meta_params['learning_rate']
+    model_params_opt_meta = [model_params_opt_meta]
+    # Optimised params from base models
+    model_params_opt_base = []
+    for count, model in enumerate(base_names):
+        try:
+            all_base_params   = base_models[count].get_all_params()
+        except:
+            all_base_params   = base_models[count].get_params()
+        model_params_opt  = {}
+        if pred_type == 'classification':
+            for key in pyc.models(internal=True).loc[model]['Tune Grid'].keys():
+                try:
+                    model_params_opt[key] = all_base_params[key]
+                except:
+                    if key == 'eta':
+                        model_params_opt['learning_rate'] = all_base_params['learning_rate']
+        if pred_type == 'regression':
+            for key in pyr.models(internal=True).loc[model]['Tune Grid'].keys():
+                try:
+                    model_params_opt[key] = all_base_params[key]
+                except:
+                    if key == 'eta':
+                        model_params_opt['learning_rate'] = all_base_params['learning_rate']
+        model_params_opt_base.append(model_params_opt)
+    # Merge dictionaries
+    models_params_meta_df = pd.DataFrame.from_dict(model_params_opt_meta)
+    models_params_base_df = pd.DataFrame.from_dict(model_params_opt_base)
+    models_params_base_df = pd.DataFrame(models_params_base_df.to_numpy(),\
+                                         index=list(np.arange(1, len(base_names) + 1)),\
+                                         columns=models_params_base_df.columns)
+    models_params_df      = pd.concat([models_params_meta_df, models_params_base_df]).transpose()
+    full_names            = [meta_model_name] +  base_names
+    new_cols              = {col: name for col, name in zip(models_params_df.columns, full_names)}
+    models_params_df      = models_params_df.rename(columns=new_cols)
+    return models_params_df
 
 ##########################################
 # Plotting methods
