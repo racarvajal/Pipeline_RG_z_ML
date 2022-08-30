@@ -23,8 +23,7 @@ ML_09.ipynb                 		File for SHAP analysis of META models for high-z o
 ML_10.ipynb                 		File for SHAP analysis of BASE models for high-z or random predicted sources.
 ML_11.ipynb                 		File for analysis of scores and metrics of models.
 ML_12.ipynb                 		File for applying pipeline and creating tables for exporting candidates.
-ML_13.ipynb                 		File for plotting trees and decisions of models.
-ML_14.ipynb                 		File for plotting distribution of transformed features (for each model and dataset).
+ML_13.ipynb                 		File for plotting distribution of transformed features (for each model and dataset).
 
 /moc_files                                      MOC files.
 CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits MOC file for VLA-COSMOS 3GHz Survey.
