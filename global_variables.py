@@ -29,16 +29,28 @@ file_COSMOS        = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGS
 file_S82_Ananna_17 = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp_5sigma_imp.h5'
 
 # Model file names
+# Old model names with train, test, and validation sub-sets
 # Stacked models
-star_model         = 'classification_star_no_star_jun_30_2022'
-AGN_gal_model      = 'classification_AGN_galaxy_ago_03_2022'
-radio_model        = 'classification_radio_detect_ago_02_2022'
-full_z_model       = 'regression_z_ago_04_2022'
-high_z_model       = 'regression_z_jul_19_2022'
+# star_model         = 'classification_star_no_star_jun_30_2022'
+# AGN_gal_model      = 'classification_AGN_galaxy_ago_03_2022'
+# radio_model        = 'classification_radio_detect_ago_02_2022'
+# full_z_model       = 'regression_z_ago_04_2022'
+# high_z_model       = 'regression_z_jul_19_2022'
+# # Calibrated models
+# cal_str_model      = 'cal_classification_star_no_star_ago_25_2022.joblib'
+# cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_03_2022.joblib'
+# cal_radio_model    = 'cal_classification_radio_detect_ago_02_2022.joblib'
+# New model names with train, test, calibration, and validation sub-sets
+# Stacked models
+star_model         = 'classification_star_no_star_ago_29_2022'
+AGN_gal_model      = 'classification_AGN_galaxy_ago_30_2022'
+radio_model        = 'classification_radio_detect_ago_31_2022'
+full_z_model       = 'regression_z_sep_01_2022'
+high_z_model       = 'regression_high_z_sep_02_2022'
 # Calibrated models
-cal_str_model      = 'cal_classification_star_no_star_ago_25_2022.joblib'
-cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_03_2022.joblib'
-cal_radio_model    = 'cal_classification_radio_detect_ago_02_2022.joblib'
+cal_str_model      = 'cal_classification_star_no_star_ago_29_2022.joblib'
+cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_30_2022.joblib'
+cal_radio_model    = 'cal_classification_radio_detect_ago_31_2022.joblib'
 
 # Seeds
 seed               = 42
@@ -49,13 +61,23 @@ naive_star_thresh  = 0.5
 naive_AGN_thresh   = 0.5
 naive_radio_thresh = 0.5
 # PR-optimised
-star_thresh        = 0.45967
-AGN_thresh         = 0.44535
-radio_thresh       = 0.495866031
-# Calibrated and PR-optimised models
-cal_str_thresh     = 0.17790
-cal_AGN_thresh     = 0.34611
-cal_radio_thresh   = 0.24164
+# Values obtained with train, test, and validation sub-sets
+# star_thresh        = 0.45967
+# AGN_thresh         = 0.44535
+# radio_thresh       = 0.495866031
+# # Calibrated and PR-optimised models
+# cal_str_thresh     = 0.17790
+# cal_AGN_thresh     = 0.34611
+# cal_radio_thresh   = 0.24164
+# Values obtained with train, test, calibration, and validation sub-sets
+# PR-optimised models (with train+test sub-set)
+star_thresh        = 0.26115
+AGN_thresh         = 0.43475
+radio_thresh       = 0.497101925
+# Calibrated and PR-optimised models (with calibration sub-set)
+cal_str_thresh     = 0.60073
+cal_AGN_thresh     = 0.57417
+cal_radio_thresh   = 0.27404
 # High redshift limit
 high_z_limit       = 2.0  # 3.6
 

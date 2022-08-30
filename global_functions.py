@@ -10,6 +10,7 @@ import pandas as pd
 import shap
 import copy
 import sklearn.pipeline as skp
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay
 from astropy.visualization import LogStretch, PowerStretch
 from astropy.visualization.mpl_normalize import ImageNormalize
@@ -24,6 +25,20 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import global_variables as gv
 
 ##########################################
+##########################################
+# Split datasets for training, test, and more
+def split_set(catalog_df, fractions, target_feat, use_calibration=True):
+    train_test_df, validation_df = train_test_split(catalog_df, test_size=fractions[0], random_state=gv.seed,\
+                                                    stratify=catalog_df.loc[:, target_feat])
+    train_df, test_calib_df      = train_test_split(train_test_df, test_size=fractions[1], random_state=gv.seed,\
+                                                    stratify=train_test_df.loc[:, target_feat])
+    if not use_calibration:
+        return train_test_df, train_df, test_calib_df, validation_df
+    elif use_calibration:
+        test_df, calibration_df  = train_test_split(test_calib_df, test_size=fractions[2], random_state=gv.seed,\
+                                                    stratify=test_calib_df.loc[:, target_feat])
+        return train_test_df, train_df, test_df, calibration_df, validation_df
+    
 ##########################################
 # Define additional metrics for regression
 def sigma_mad(z_true, z_pred, **kwargs):
