@@ -220,7 +220,7 @@ plots/*
 !plots/flowchart_pipeline_radio_AGN_z.pdf
 
 # Catalogues of predicted sources
-pred_rAGN/*
+pred_rAGN/*.csv
 !pred_rAGN/README.md
 
 # Temporary notebooks
