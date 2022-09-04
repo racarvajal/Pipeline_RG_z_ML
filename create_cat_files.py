@@ -97,9 +97,9 @@ file_name_clean_S82_err    = gv.fits_S82.replace('.fits', '_err_5sigma_imp.h5') 
 # file_name_clean_S82_err    = gv.fits_S82_Ananna_17.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
 file_name_clean_COSMOS_err = gv.fits_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
-run_HETDEX_flag = True
-run_S82_flag    = True
-run_COSMOS_flag = True
+run_HETDEX_flag = False
+run_S82_flag    = False
+run_COSMOS_flag = False
 
 run_S82_full    = True  # True for use all S82 sources. False for using Ananna+17 sample
 
@@ -107,9 +107,9 @@ run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
 run_COSMOS_errors_flag = False
 
-save_HETDEX_flag = True
-save_S82_flag    = True
-save_COSMOS_flag = True
+save_HETDEX_flag = False
+save_S82_flag    = False
+save_COSMOS_flag = False
 
 save_HETDEX_errors_flag = False
 save_S82_errors_flag    = False
