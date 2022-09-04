@@ -252,7 +252,7 @@ if run_HETDEX_flag:
     # Create derived features
     print('Creating colours')
     imputed_HETDEX_df     = create_colours(imputed_HETDEX_df,     mag_cols_for_colours)
-    non_imputed_HETDEX_df = create_colours(pd.concat([non_imputed_HETDEX_df, mags_HETDEX_df]),\
+    non_imputed_HETDEX_df = create_colours(pd.concat([non_imputed_HETDEX_df, mags_HETDEX_df], ignore_index=True),\
                             mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
@@ -377,7 +377,7 @@ if run_S82_flag:
     # Create derived features
     print('Creating colours')
     imputed_S82_df     = create_colours(imputed_S82_df,     mag_cols_for_colours)
-    non_imputed_S82_df = create_colours(pd.concat([non_imputed_S82_df, mags_S82_df]),\
+    non_imputed_S82_df = create_colours(pd.concat([non_imputed_S82_df, mags_S82_df], ignore_index=True),\
                          mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
@@ -616,7 +616,7 @@ if run_COSMOS_flag:
     # Create derived features
     print('Creating colours')
     imputed_COSMOS_df     = create_colours(imputed_COSMOS_df,     mag_cols_for_colours)
-    non_imputed_COSMOS_df = create_colours(pd.concat([non_imputed_COSMOS_df, mags_COSMOS_df]),\
+    non_imputed_COSMOS_df = create_colours(pd.concat([non_imputed_COSMOS_df, mags_COSMOS_df], ignore_index=True),\
                             mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
