@@ -97,9 +97,9 @@ file_name_clean_S82_err    = gv.fits_S82.replace('.fits', '_err_5sigma_imp.h5') 
 # file_name_clean_S82_err    = gv.fits_S82_Ananna_17.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
 file_name_clean_COSMOS_err = gv.fits_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
-run_HETDEX_flag = False
-run_S82_flag    = False
-run_COSMOS_flag = False
+run_HETDEX_flag = True
+run_S82_flag    = True
+run_COSMOS_flag = True
 
 run_S82_full    = True  # True for use all S82 sources. False for using Ananna+17 sample
 
@@ -107,9 +107,9 @@ run_HETDEX_errors_flag = False
 run_S82_errors_flag    = False
 run_COSMOS_errors_flag = False
 
-save_HETDEX_flag = False
-save_S82_flag    = False
-save_COSMOS_flag = False
+save_HETDEX_flag = True
+save_S82_flag    = True
+save_COSMOS_flag = True
 
 save_HETDEX_errors_flag = False
 save_S82_errors_flag    = False
@@ -241,6 +241,7 @@ if run_HETDEX_flag:
     band_count_HETDEX_df = create_band_count(mags_HETDEX_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
+    non_imputed_HETDEX_df = imputed_HETDEX_df.copy()
     print('Imputing values')
     
     for col in magnitude_cols:
@@ -250,7 +251,8 @@ if run_HETDEX_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_HETDEX_df = create_colours(imputed_HETDEX_df, mag_cols_for_colours)
+    imputed_HETDEX_df     = create_colours(imputed_HETDEX_df,     mag_cols_for_colours)
+    non_imputed_HETDEX_df = create_colours(non_imputed_HETDEX_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
@@ -261,9 +263,11 @@ if run_HETDEX_flag:
 
     if save_HETDEX_flag:
         print('Joining all tables')
-        clean_cat_final_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_count_HETDEX_df, imputed_HETDEX_df], axis=1)
+        cat_final_non_imp_HETDEX_df = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, non_imputed_HETDEX_df], axis=1)
+        clean_cat_final_HETDEX_df   = pd.concat([clean_cat_HETDEX_df, band_count_HETDEX_df, imputed_count_HETDEX_df, imputed_HETDEX_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
+        cat_final_non_imp_HETDEX_df.to_hdf(gv.cat_path + gv.file_non_imp_HETDEX, key='df')
         clean_cat_final_HETDEX_df.to_hdf(gv.cat_path + gv.file_HETDEX, key='df')
 
 #######
@@ -361,6 +365,7 @@ if run_S82_flag:
     band_count_S82_df = create_band_count(mags_S82_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
+    non_imputed_S82_df = imputed_S82_df.copy()
     print('Imputing values')
     
     for col in magnitude_cols:
@@ -370,7 +375,8 @@ if run_S82_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_S82_df = create_colours(imputed_S82_df, mag_cols_for_colours)
+    imputed_S82_df     = create_colours(imputed_S82_df,     mag_cols_for_colours)
+    non_imputed_S82_df = create_colours(non_imputed_S82_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_S82_df = create_ratios(imputed_S82_df)
@@ -381,10 +387,12 @@ if run_S82_flag:
 
     if save_S82_flag:
         print('Joining all tables')
-        clean_cat_final_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_count_S82_df, imputed_S82_df], axis=1)
+        cat_final_non_imp_S82_df = pd.concat([clean_cat_S82_df, band_count_S82_df, non_imputed_S82_df], axis=1)
+        clean_cat_final_S82_df   = pd.concat([clean_cat_S82_df, band_count_S82_df, imputed_count_S82_df, imputed_S82_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
         if run_S82_full:
+            cat_final_non_imp_S82_df.to_hdf(gv.cat_path + gv.file_non_imp_S82, key='df')
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82, key='df')
         if not run_S82_full:
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82_Ananna_17, key='df')
@@ -595,6 +603,7 @@ if run_COSMOS_flag:
     band_count_COSMOS_df = create_band_count(mags_COSMOS_df, mag_cols_for_colours, 'band_num')
 
     # Impute values
+    non_imputed_COSMOS_df = imputed_COSMOS_df.copy()
     print('Imputing values')
     
     for col in magnitude_cols:
@@ -604,7 +613,8 @@ if run_COSMOS_flag:
 
     # Create derived features
     print('Creating colours')
-    imputed_COSMOS_df = create_colours(imputed_COSMOS_df, mag_cols_for_colours)
+    imputed_COSMOS_df     = create_colours(imputed_COSMOS_df,     mag_cols_for_colours)
+    non_imputed_COSMOS_df = create_colours(non_imputed_COSMOS_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
@@ -615,7 +625,9 @@ if run_COSMOS_flag:
 
     if save_COSMOS_flag:
         print('Joining all tables')
-        clean_cat_final_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_count_COSMOS_df, imputed_COSMOS_df], axis=1)
+        cat_final_non_imp_COSMOS_df = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, non_imputed_COSMOS_df], axis=1)
+        clean_cat_final_COSMOS_df   = pd.concat([clean_cat_COSMOS_df, band_count_COSMOS_df, imputed_count_COSMOS_df, imputed_COSMOS_df], axis=1)
         # save new catalogue to a hdf5 file (.h5)
         print('Saving final table to file')
+        cat_final_non_imp_COSMOS_df.to_hdf(gv.cat_path + gv.file_non_imp_COSMOS, key='df')
         clean_cat_final_COSMOS_df.to_hdf(gv.cat_path + gv.file_COSMOS, key='df')
