@@ -248,12 +248,12 @@ if run_HETDEX_flag:
         imputed_HETDEX_df.loc[:, col] = mags_HETDEX_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
         imputed_HETDEX_df.loc[:, col] = imputed_HETDEX_df.loc[:, col].mask(imputed_HETDEX_df.loc[:, col] >\
              mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+        non_imputed_HETDEX_df.loc[:, col] = mags_HETDEX_df.loc[:, col]
 
     # Create derived features
     print('Creating colours')
     imputed_HETDEX_df     = create_colours(imputed_HETDEX_df,     mag_cols_for_colours)
-    non_imputed_HETDEX_df = create_colours(pd.concat([non_imputed_HETDEX_df, mags_HETDEX_df], ignore_index=True),\
-                            mag_cols_for_colours)
+    non_imputed_HETDEX_df = create_colours(non_imputed_HETDEX_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_HETDEX_df = create_ratios(imputed_HETDEX_df)
@@ -373,12 +373,12 @@ if run_S82_flag:
         imputed_S82_df.loc[:, col] = mags_S82_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
         imputed_S82_df.loc[:, col] = imputed_S82_df.loc[:, col].mask(imputed_S82_df.loc[:, col] >\
              mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+        non_imputed_S82_df.loc[:, col] = mags_S82_df.loc[:, col]
 
     # Create derived features
     print('Creating colours')
     imputed_S82_df     = create_colours(imputed_S82_df,     mag_cols_for_colours)
-    non_imputed_S82_df = create_colours(pd.concat([non_imputed_S82_df, mags_S82_df], ignore_index=True),\
-                         mag_cols_for_colours)
+    non_imputed_S82_df = create_colours(non_imputed_S82_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_S82_df = create_ratios(imputed_S82_df)
@@ -612,12 +612,12 @@ if run_COSMOS_flag:
         imputed_COSMOS_df.loc[:, col] = mags_COSMOS_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
         imputed_COSMOS_df.loc[:, col] = imputed_COSMOS_df.loc[:, col].mask(imputed_COSMOS_df.loc[:, col] >\
              mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+        non_imputed_COSMOS_df.loc[:, col] = mags_COSMOS_df.loc[:, col]
 
     # Create derived features
     print('Creating colours')
     imputed_COSMOS_df     = create_colours(imputed_COSMOS_df,     mag_cols_for_colours)
-    non_imputed_COSMOS_df = create_colours(pd.concat([non_imputed_COSMOS_df, mags_COSMOS_df], ignore_index=True),\
-                            mag_cols_for_colours)
+    non_imputed_COSMOS_df = create_colours(non_imputed_COSMOS_df, mag_cols_for_colours)
 
     print('Not creating magnitude ratios')
     # imputed_COSMOS_df = create_ratios(imputed_COSMOS_df)
