@@ -49,13 +49,15 @@ file_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MIL
 # Stacked models
 star_model         = 'classification_star_no_star_ago_29_2022'
 AGN_gal_model      = 'classification_AGN_galaxy_ago_30_2022'
-radio_model        = 'classification_radio_detect_ago_31_2022'
+# radio_model        = 'classification_radio_detect_ago_31_2022'
+radio_model        = 'classification_LOFAR_detect_sep_07_2022'
 full_z_model       = 'regression_z_sep_01_2022'
 high_z_model       = 'regression_high_z_sep_02_2022'
 # Calibrated models
 cal_str_model      = 'cal_classification_star_no_star_ago_29_2022.joblib'
 cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_30_2022.joblib'
-cal_radio_model    = 'cal_classification_radio_detect_ago_31_2022.joblib'
+# cal_radio_model    = 'cal_classification_radio_detect_ago_31_2022.joblib'
+cal_radio_model    = 'cal_classification_LOFAR_detect_sep_07_2022.joblib'
 
 # Seeds
 seed               = 42
