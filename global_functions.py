@@ -114,11 +114,11 @@ def ACC_from_CM(cm_array):
     ACC = (TP + TN) / (TP + TN + FP + FN)
     return ACC
 
-# F-1 score
-def F1_from_CM(cm_array):
+# F-beta score
+def Fb_from_CM(cm_array, beta=gv.beta_F):
     _, FP, FN, TP = flatten_CM(cm_array)
-    F1 = 2 * TP / (2 * TP + FP + FN)
-    return F1
+    Fb = (1 + beta**2) * TP / ((1 + beta**2) * TP + FN * beta**2 + FP)
+    return Fb
 
 # Precison
 def Precision_from_CM(cm_array):
@@ -135,18 +135,18 @@ def Recall_from_CM(cm_array):
 # Create DataFrame with scores for several datasets
 def create_scores_df(list_of_cms, list_of_sets, list_of_scores):
     MCC       = {}
-    F1        = {}
+    Fb        = {}
     Precision = {}
     Recall    = {}
     ACC       = {}
     for count, cm in enumerate(list_of_cms):
-        F1[count]        = F1_from_CM(cm)
+        Fb[count]        = Fb_from_CM(cm)
         MCC[count]       = MCC_from_CM(cm)
         Precision[count] = Precision_from_CM(cm)
         Recall[count]    = Recall_from_CM(cm)
         ACC[count]       = ACC_from_CM(cm)
         
-    scores_array  = np.transpose(np.array([[F1[key]        for key in F1],\
+    scores_array  = np.transpose(np.array([[Fb[key]        for key in Fb],\
                                            [MCC[key]       for key in MCC],\
                                            [Precision[key] for key in Precision],\
                                            [Recall[key]    for key in Recall],\

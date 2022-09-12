@@ -49,18 +49,20 @@ cal_radio_model    = 'cal_classification_LOFAR_detect_sep_07_2022.joblib'
 seed               = 42
 
 # Thresholds
+# Beta for beta-scores
+beta_F             = 1.1  # beta positive real value
 # Naive values
 naive_star_thresh  = 0.5
 naive_AGN_thresh   = 0.5
 naive_radio_thresh = 0.5
 # Values obtained with train, test, calibration, and validation sub-sets
 # PR-optimised models (with train+test sub-set)
-star_thresh        = 0.26115
+star_thresh        = 0.1873511777
 AGN_thresh         = 0.4347533096
 radio_thresh       = 0.4972282762
 # Calibrated and PR-optimised models (with calibration sub-set)
 cal_str_thresh     = 0.6007345636412931
-cal_AGN_thresh     = 0.574165428416621
+cal_AGN_thresh     = 0.39889114096089423
 cal_radio_thresh   = 0.18991847427666925
 # High redshift limit
 high_z_limit       = 2.0  # 3.6
