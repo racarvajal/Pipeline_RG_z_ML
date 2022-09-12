@@ -120,6 +120,12 @@ def F1_from_CM(cm_array):
     F1 = 2 * TP / (2 * TP + FP + FN)
     return F1
 
+# Precison
+def Precision_from_CM(cm_array):
+    TN, FP, FN, TP = flatten_CM(cm_array)
+    Precision = TP / (TP + FP)
+    return Precision
+
 # Recall
 def Recall_from_CM(cm_array):
     TN, FP, FN, TP = flatten_CM(cm_array)
@@ -128,20 +134,23 @@ def Recall_from_CM(cm_array):
 
 # Create DataFrame with scores for several datasets
 def create_scores_df(list_of_cms, list_of_sets, list_of_scores):
-    MCC    = {}
-    ACC    = {}
-    F1     = {}
-    Recall = {}
+    MCC       = {}
+    F1        = {}
+    Precision = {}
+    Recall    = {}
+    ACC       = {}
     for count, cm in enumerate(list_of_cms):
-        F1[count]     = F1_from_CM(cm)
-        MCC[count]    = MCC_from_CM(cm)
-        Recall[count] = Recall_from_CM(cm)
-        ACC[count]    = ACC_from_CM(cm)
+        F1[count]        = F1_from_CM(cm)
+        MCC[count]       = MCC_from_CM(cm)
+        Precision[count] = Precision_from_CM(cm)
+        Recall[count]    = Recall_from_CM(cm)
+        ACC[count]       = ACC_from_CM(cm)
         
-    scores_array  = np.transpose(np.array([[F1[key]     for key in F1],\
-                                           [MCC[key]    for key in MCC],\
-                                           [Recall[key] for key in Recall],\
-                                           [ACC[key]    for key in ACC]]))
+    scores_array  = np.transpose(np.array([[F1[key]        for key in F1],\
+                                           [MCC[key]       for key in MCC],\
+                                           [Precision[key] for key in Precision],\
+                                           [Recall[key]    for key in Recall],\
+                                           [ACC[key]       for key in ACC]]))
     scores_df = pd.DataFrame(data=scores_array, columns=list_of_scores, index=list_of_sets)
     return scores_df
 
