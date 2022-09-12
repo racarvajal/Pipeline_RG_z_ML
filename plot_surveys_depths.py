@@ -5,15 +5,16 @@
 # both magnitude and flux.
 
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 from astropy import units as u
 from astropy.cosmology import FlatLambdaCDM
 import colorcet as cc
 import cmasher as cmr
-import pandas as pd
 import global_variables as gv
 import global_functions as gf
+
+mpl.rcdefaults()
 
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Tcmb0=2.725 * u.K, Om0=0.3)
 
@@ -119,7 +120,7 @@ depth_5sigma_AB      = np.array([filt_5sigma_lim_AB[key_].value    for key_ in l
 depth_5sigma_flux    = np.array([filt_5sigma_lim_flux[key_].value  for key_ in list(filt_5sigma_lim_flux.keys())])
 
 AGN_sed  = 'observed'  # 'rest-frame' or 'observed'
-AGN_name = 'mrk231'  # 'mrk231', '3c273'
+AGN_name = 'mrk231'    # 'mrk231', '3c273'
 if AGN_sed == 'observed':
     # Load SED from AGN (observed)
     # Mrk 231 
@@ -151,7 +152,6 @@ show_plot_flag = True
 # original redshift from source
 orig_z = 0.0422  # Mrk231
 # orig_z = 0.1583  # 3C273
-cmap_bands = 'cmr.pride' # 'cet_CET_C6'
 
 fig             = plt.figure(figsize=(12,4.0))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
@@ -159,7 +159,7 @@ ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 # Plot band limits in magnitude vs wavelength axes
 for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_5sigma_AB, central_pos_width_um)):
     ax1.errorbar(cent_pos, depth, xerr=band_width/2, ls='None', marker='None',\
-         ecolor=plt.get_cmap(cmap_bands, len(filter_names))(count / len(filter_names)),\
+         ecolor=plt.get_cmap(gv.cmap_bands, len(filter_names))(count / len(filter_names)),\
               elinewidth=4, path_effects=gf.pe1, zorder=10)
 for count, filt_name in enumerate(filter_names):
     centering = 'center'
@@ -170,9 +170,9 @@ for count, filt_name in enumerate(filter_names):
     # if 'NUV' in filt_name: centering = 'left'
     # if 'CW' in filt_name: valign = 'top'
     ax1.annotate(filt_name.replace('-AW', '').replace('-CW', ''), (central_pos_um[count], depth_5sigma_AB[count]),\
-         textcoords='offset points', xytext=(-3, 3.5), fontsize=15,\
+         textcoords='offset points', xytext=(-3, 3.5), fontsize=14,\
          ha=centering, path_effects=gf.pe2, zorder=10, va=valign)
-ax1.set_ylim(bottom=-3.5, top=24.5)
+ax1.set_ylim(bottom=4.0, top=24.0)
 ax1.invert_yaxis()
 
 # Add extra axis in flux units
@@ -185,7 +185,7 @@ ax2.tick_params(which='both', bottom=False, left=False, direction='in')
 ax2.tick_params(axis='both', which='major', labelsize=14)
 ax2.tick_params(which='major', length=8, width=1.5)
 ax2.tick_params(which='minor', length=4, width=1.5)
-ax2.set_ylabel('$\mathrm{Flux}_{5\sigma\, \mathrm{Depth}}\, [\mu \mathrm{Jy}]$', size=20)
+ax2.set_ylabel('$\mathrm{Flux}_{5\sigma\, \mathrm{Depth}}\, [\mu \mathrm{Jy}]$', size=18)
 ax2.set_yscale('log')
 
 # Add extra axis in frequency units
@@ -198,45 +198,47 @@ ax3.tick_params(which='both', bottom=False, left=False, direction='in')
 ax3.tick_params(axis='both', which='major', labelsize=14)
 ax3.tick_params(which='major', length=8, width=1.5)
 ax3.tick_params(which='minor', length=4, width=1.5)
-ax3.set_xlabel('Frequency [GHz]', size=20)
+ax3.set_xlabel('Frequency [GHz]', size=18)
 ax3.set_xscale('log')
 
 # Add AGN SED
 z_zero_proxy         = 1e-2  # closest to z = 0
-redshift_factor_orig = cosmo.luminosity_distance(orig_z).to(u.Mpc).value /\
-                        cosmo.luminosity_distance(z_zero_proxy).to(u.Mpc).value
+
+# Define rest-frame SED
 if AGN_sed == 'observed':
     AGN_wave_rf     = AGN_wave * (1 + orig_z)  # Rest-frame wavelength
     AGN_flux_uJy    = AGN_flux.to(u.uJy)
-    AGN_flux_rf_uJy = AGN_flux_uJy * redshift_factor_orig
+    # AGN_flux_rf_uJy = AGN_flux_uJy * redshift_factor_orig
+    AGN_flux_rf_uJy = AGN_flux_uJy * (1 + orig_z)
 elif AGN_sed == 'rest-frame':
     AGN_wave_rf     = AGN_wave
     AGN_wave        = AGN_wave * (1 + orig_z)
     AGN_flux_rf_uJy = AGN_flux.to(u.uJy)
     AGN_flux_uJy    = AGN_flux_rf_uJy
-ax2.plot(AGN_wave_rf.value, AGN_flux_rf_uJy.value, zorder=1, color='k', lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
-ax2.plot(AGN_wave.value, AGN_flux_rf_uJy.value / redshift_factor_orig, zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
-max_z_plot = 2
-# np.abs((np.log10(z) - 2) / (max_z_plot / 2))
-for z in np.logspace(np.log10(z_zero_proxy), np.log10(max_z_plot), 8):
-    redshift_factor = cosmo.luminosity_distance(orig_z) / cosmo.luminosity_distance(z)
-    ax2.plot(AGN_wave_rf.value * (1 + z), AGN_flux_uJy.value * (redshift_factor)**2,\
-         zorder=0, color='Gray', lw=1, alpha=np.abs(1 - z / max_z_plot), ls='--')
-    ax2.annotate(f'z={z:.2f}', (8e6, (AGN_flux_uJy.value * (redshift_factor)**2)[-20]),\
-         textcoords='offset points', xytext=(-20, 0), fontsize=7,\
-         ha='left', zorder=10, va='bottom', alpha=np.abs(1 - z / max_z_plot))
-ax1.set_xlim(lims_um)
-ax1.set_xlim(left=3e-1, right=1e7)
+
+ax2.plot(AGN_wave_rf.value, AGN_flux_rf_uJy.value, zorder=1, color='k',\
+     lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
+ax2.plot(AGN_wave.value, AGN_flux_rf_uJy.value / (1 + orig_z),\
+     zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
+max_z_plot = 7
+for z in np.linspace(z_zero_proxy, max_z_plot, 8):
+    ax2.plot(AGN_wave_rf.value * (1 + z), AGN_flux_uJy.value / (1 + z),\
+         zorder=0, color='Gray', lw=1, alpha=np.abs(1 - z / (max_z_plot + 2)), ls='--')
+    y_pos = int(np.where(AGN_wave_rf.value * (1 + z) >= AGN_wave_rf.value[450])[0][0])
+    ax2.annotate(f'z={z:.2f}', (AGN_wave_rf.value[450], (AGN_flux_uJy.value / (1 + z))[y_pos]),\
+         textcoords='offset points', xytext=(0, 0), fontsize=7,\
+         ha='left', zorder=10, va='bottom', alpha=np.abs(1 - z / (max_z_plot + 2)))
+ax1.set_xlim(left=2e-1, right=1e7)
 
 ax1.tick_params(which='both', top=False, right=False, direction='in')
 ax1.tick_params(axis='both', which='major', labelsize=14)
 ax1.tick_params(which='major', length=8, width=1.5)
 ax1.tick_params(which='minor', length=4, width=1.5)
-ax1.set_xlabel('$\mathrm{Wavelength}\, [\mu \mathrm{m}]$', size=20)
-ax1.set_ylabel('$m_{5\sigma\, \mathrm{Depth}}\, \mathrm{[AB]}$', size=20)
+ax1.set_xlabel('$\mathrm{Wavelength}\, [\mu \mathrm{m}]$', size=18)
+ax1.set_ylabel('$m_{5\sigma\, \mathrm{Depth}}\, \mathrm{[AB]}$', size=18)
 plt.setp(ax2.spines.values(), linewidth=3.5)
 plt.setp(ax2.spines.values(), linewidth=3.5)
-ax2.legend(loc=2, fontsize=14, title='Model AGN', title_fontsize=14)
+ax2.legend(loc=8, fontsize=12, title='Model AGN', title_fontsize=12)
 plt.tight_layout()
 
 ax1.set_zorder(ax2.get_zorder()+1)
@@ -248,4 +250,3 @@ if show_plot_flag:
     plt.show()
 if not show_plot_flag:
     plt.clf()
-
