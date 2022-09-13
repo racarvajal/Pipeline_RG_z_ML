@@ -33,6 +33,12 @@ file_S82            = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MIL
 file_COSMOS         = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16_5sigma_imp.h5'
 file_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp_5sigma_imp.h5'
 
+# Fields properties
+# Areas (deg2)
+area_HETDEX         = 424
+area_S82            = 92
+area_COSMOS         = 4  # Not real value. Placeholder
+
 # Model names with train, test, calibration, and validation sub-sets
 # Stacked models
 star_model         = 'classification_star_no_star_ago_29_2022'
