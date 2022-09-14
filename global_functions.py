@@ -11,7 +11,7 @@ import shap
 import copy
 import sklearn.pipeline as skp
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import ConfusionMatrixDisplay, fbeta_score
 from astropy.visualization import LogStretch, PowerStretch
 from astropy.visualization.mpl_normalize import ImageNormalize
 from pycaret import classification as pyc
@@ -95,7 +95,7 @@ def conf_mat_func(true_class_arr, predicted_class_arr):
                     np.sum(np.array(true_class_arr == 1) & np.array(predicted_class_arr == 1))]])
     return cm
 
-def flatten_CM(cm_array):
+def flatten_CM(cm_array, **kwargs):
     try:
         TN, FP, FN, TP = cm_array.flatten().astype('float32')
     except:
@@ -103,34 +103,39 @@ def flatten_CM(cm_array):
     return TN, FP, FN, TP
 
 # Matthews correlation coefficient
-def MCC_from_CM(cm_array):
+def MCC_from_CM(cm_array, **kwargs):
     TN, FP, FN, TP = flatten_CM(cm_array)
     MCC = ((TP * TN) - (FP * FN)) / np.sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
     return MCC
 
 # Accuracy
-def ACC_from_CM(cm_array):
+def ACC_from_CM(cm_array, **kwargs):
     TN, FP, FN, TP = flatten_CM(cm_array)
     ACC = (TP + TN) / (TP + TN + FP + FN)
     return ACC
 
 # F-beta score
-def Fb_from_CM(cm_array, beta=gv.beta_F):
+def Fb_from_CM(cm_array, beta=gv.beta_F, **kwargs):
     _, FP, FN, TP = flatten_CM(cm_array)
     Fb = (1 + beta**2) * TP / ((1 + beta**2) * TP + FN * beta**2 + FP)
     return Fb
 
 # Precison
-def Precision_from_CM(cm_array):
+def Precision_from_CM(cm_array, **kwargs):
     TN, FP, FN, TP = flatten_CM(cm_array)
     Precision = TP / (TP + FP)
     return Precision
 
 # Recall
-def Recall_from_CM(cm_array):
+def Recall_from_CM(cm_array, **kwargs):
     TN, FP, FN, TP = flatten_CM(cm_array)
     Recall = TP / (TP + FN)
     return Recall
+
+# Metric to add into Pycaret
+def f_beta(y_true, y_pred, **kwargs):
+    f_score = fbeta_score(y_true, y_pred, beta=gv.beta_F)
+    return f_score.astype('float32')
 
 # Create DataFrame with scores for several datasets
 def create_scores_df(list_of_cms, list_of_sets, list_of_scores):
