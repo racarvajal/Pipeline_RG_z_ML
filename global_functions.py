@@ -8,6 +8,7 @@
 import numpy as np
 import pandas as pd
 import shap
+import fasttreeshap
 import copy
 import sklearn.pipeline as skp
 from sklearn.model_selection import train_test_split
@@ -501,10 +502,10 @@ def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap=
 # Plot SHAP beeswarm
 def plot_shap_beeswarm(pred_type, model_name, shap_values, cmap=gv.cmap_shap, ax_factor=0.75, base_meta=''):
     if np.ndim(shap_values.values) == 2:
-        shap.plots.beeswarm(copy.deepcopy(shap_values), log_scale=False, show=False, color_bar=False,
+        fasttreeshap.plots.beeswarm(copy.deepcopy(shap_values), log_scale=False, show=False, color_bar=False,
                             color=plt.get_cmap(cmap), max_display=len(shap_values.feature_names), alpha=1.0)
     elif np.ndim(shap_values.values) > 2:
-        shap.plots.beeswarm(copy.deepcopy(shap_values)[:, :, 1], log_scale=False, show=False, color_bar=False,
+        fasttreeshap.plots.beeswarm(copy.deepcopy(shap_values)[:, :, 1], log_scale=False, show=False, color_bar=False,
                             color=plt.get_cmap(cmap), max_display=len(shap_values.feature_names), alpha=1.0)
     _, h = plt.gcf().get_size_inches()
     m  = cm.ScalarMappable(cmap=cmap)
