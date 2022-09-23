@@ -11,10 +11,12 @@ from astropy import units as u
 from astropy.cosmology import FlatLambdaCDM
 import colorcet as cc
 import cmasher as cmr
+# from adjustText import adjust_text
 import global_variables as gv
 import global_functions as gf
 
 mpl.rcdefaults()
+plt.rcParams['text.usetex'] = True
 
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Tcmb0=2.725 * u.K, Om0=0.3)
 
@@ -153,7 +155,7 @@ show_plot_flag = True
 orig_z = 0.0422  # Mrk231
 # orig_z = 0.1583  # 3C273
 
-fig             = plt.figure(figsize=(12,4.0))
+fig             = plt.figure(figsize=(8,4.0))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 
 # Plot band limits in magnitude vs wavelength axes
@@ -161,17 +163,21 @@ for count, (cent_pos, depth, band_width) in enumerate(zip(central_pos_um, depth_
     ax1.errorbar(cent_pos, depth, xerr=band_width/2, ls='None', marker='None',\
          ecolor=plt.get_cmap(gv.cmap_bands, len(filter_names))(count / len(filter_names)),\
               elinewidth=4, path_effects=gf.pe1, zorder=10)
+band_texts = []
 for count, filt_name in enumerate(filter_names):
     centering = 'center'
     valign    = 'bottom'
     if 'W2' in filt_name: centering = 'right'
     if 'W2' in filt_name: centering = 'left'
-    if 'y' in filt_name: centering = 'left'
+    if 'y' in filt_name:  centering = 'left'
+    if 'Ks' in filt_name: centering = 'left'
     # if 'NUV' in filt_name: centering = 'left'
     # if 'CW' in filt_name: valign = 'top'
-    ax1.annotate(filt_name.replace('-AW', '').replace('-CW', ''), (central_pos_um[count], depth_5sigma_AB[count]),\
+    band_texts.append(ax1.annotate(filt_name.replace('-AW', '').replace('-CW', ''), (central_pos_um[count], depth_5sigma_AB[count]),\
          textcoords='offset points', xytext=(-3, 3.5), fontsize=14,\
-         ha=centering, path_effects=gf.pe2, zorder=10, va=valign)
+         ha=centering, path_effects=gf.pe2, zorder=10, va=valign))
+#n_iter_adjust = adjust_text(band_texts, arrowprops=dict(arrowstyle="-", color='k', lw=1.5))
+#print(f'Text adjustment took {n_iter_adjust} iterations')
 ax1.set_ylim(bottom=4.0, top=24.0)
 ax1.invert_yaxis()
 
@@ -198,7 +204,7 @@ ax3.tick_params(which='both', bottom=False, left=False, direction='in')
 ax3.tick_params(axis='both', which='major', labelsize=14)
 ax3.tick_params(which='major', length=8, width=1.5)
 ax3.tick_params(which='minor', length=4, width=1.5)
-ax3.set_xlabel('Frequency [GHz]', size=18)
+ax3.set_xlabel('$\mathrm{Frequency\, [GHz]}$', size=18)
 ax3.set_xscale('log')
 
 # Add AGN SED
