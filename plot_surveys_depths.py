@@ -41,9 +41,9 @@ def FluxLimToSigma(flux_lim, old_sigma, new_sigma) -> u.quantity.Quantity:
 
 c = 299_792_458 * u.m / u.s
 
-filter_names = ['g', 'r', 'i', 'z', 'y', 'J', 'H', 'Ks', 'W1-CW',\
-                'W2-CW', 'W3-AW', 'W4-AW', 'VLASS', 'VLAS82', 'TGSS',\
-                'LoTSS', 'LoLSS']  # Without 'W1-AW', 'W2-AW', 'FUVmag', 'NUVmag'
+filter_names = ['g', 'r', 'i', 'z', 'y', 'J', 'H', 'Ks',\
+                'W1-CW', 'W2-CW', 'W3-AW', 'W4-AW', 'VLAS82',\
+                'LoTSS']  # Without 'W1-AW', 'W2-AW', 'FUVmag', 'NUVmag', 'VLASS', 'TGSS', 'LoLSS'
 
 # Limits as quoted from original reference
 filt_initial_sigma = {'FUV': 5, 'NUV': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5,\
@@ -148,14 +148,14 @@ elif AGN_sed == 'rest-frame':
     AGN_flux   = (AGN_flux_l * AGN_wave**2 / c).to(u.Jy)
 
 # Plot bands and depths
-save_plot_flag = False
-show_plot_flag = True
+save_plot_flag = True
+show_plot_flag = False
 
 # original redshift from source
 orig_z = 0.0422  # Mrk231
 # orig_z = 0.1583  # 3C273
 
-fig             = plt.figure(figsize=(8,4.0))
+fig             = plt.figure(figsize=(8,3.5))
 ax1             = fig.add_subplot(111, xscale='log', yscale='linear')
 
 # Plot band limits in magnitude vs wavelength axes
@@ -169,7 +169,7 @@ for count, filt_name in enumerate(filter_names):
     valign    = 'bottom'
     if 'W2' in filt_name: centering = 'right'
     if 'W2' in filt_name: centering = 'left'
-    if 'y' in filt_name:  centering = 'left'
+    if 'y'  in filt_name: centering = 'left'
     if 'Ks' in filt_name: centering = 'left'
     # if 'NUV' in filt_name: centering = 'left'
     # if 'CW' in filt_name: valign = 'top'
@@ -234,7 +234,7 @@ for z in np.linspace(z_zero_proxy, max_z_plot, 8):
     ax2.annotate(f'z={z:.2f}', (AGN_wave_rf.value[450], (AGN_flux_uJy.value / (1 + z))[y_pos]),\
          textcoords='offset points', xytext=(0, 0), fontsize=7,\
          ha='left', zorder=10, va='bottom', alpha=np.abs(1 - z / (max_z_plot + 2)))
-ax1.set_xlim(left=2e-1, right=1e7)
+ax1.set_xlim(left=2e-1, right=5e6)
 
 ax1.tick_params(which='both', top=False, right=False, direction='in')
 ax1.tick_params(axis='both', which='major', labelsize=14)
