@@ -148,8 +148,8 @@ elif AGN_sed == 'rest-frame':
     AGN_flux   = (AGN_flux_l * AGN_wave**2 / c).to(u.Jy)
 
 # Plot bands and depths
-save_plot_flag = True
-show_plot_flag = False
+save_plot_flag = False
+show_plot_flag = True
 
 # original redshift from source
 orig_z = 0.0422  # Mrk231
