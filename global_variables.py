@@ -10,6 +10,7 @@ plots_path         = 'plots/'
 models_path        = 'models/'
 preds_path         = 'pred_rAGN/'
 moc_path           = 'moc_files/'
+tmp_shap_path      = 'tmp_shap/'
 
 # Boolean flags
 use_5sigma         = True  # use files with 5-sigma magnitude imputation
