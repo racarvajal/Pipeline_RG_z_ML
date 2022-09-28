@@ -5,4 +5,4 @@ models for predicting the detection of Radio Galaxies and their redshift values.
 
 ## Folder Description
 
-This folder includes catalogues of predicted Radio AGN and some of their properties.
+This folder includes list of mean absolute Shapley values for features in meta learners.
