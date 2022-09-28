@@ -226,3 +226,7 @@ pred_rAGN/*.csv
 # Temporary notebooks
 temp_notebooks/
 temp_notebooks/*
+
+# Mean SHAP values from meta learners
+tmp_shap/*.h5
+!tmp_shap/README.md
