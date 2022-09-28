@@ -375,6 +375,41 @@ def obtain_optimised_hyperpars(pycaret_pipeline, meta_model_name, pred_type='cla
     new_cols              = {col: name for col, name in zip(models_params_df.columns, full_names)}
     models_params_df      = models_params_df.rename(columns=new_cols)
     return models_params_df
+##########################################
+# Methods using SHAP Explanations and values
+# Sorted mean absolute SHAP values
+def mean_abs_SHAP_base_models(SHAP_values_dict, base_models_names):
+    sorted_mean_abs_SHAP_df            = {}
+    for model in base_models_names:
+        column_names_base              = SHAP_values_dict[model].feature_names
+        if np.ndim(SHAP_values_dict[model].values) == 2:
+            mean_abs_SHAP_coefs_base       = np.mean(np.abs(SHAP_values_dict[model].values), axis=0)
+        if np.ndim(SHAP_values_dict[model].values) > 2:
+            mean_abs_SHAP_coefs_base       = np.mean(np.abs(SHAP_values_dict[model].values[:, :, 1]), axis=0)
+        mean_abs_SHAP_base_df          = pd.DataFrame({'Feature': column_names_base,
+                                                       'Mean_abs_SHAP': mean_abs_SHAP_coefs_base})
+        sorted_mean_abs_SHAP_df[model] = (
+                                         mean_abs_SHAP_base_df
+                                         .sort_values(by='Mean_abs_SHAP',ascending=False)
+                                         .reset_index(drop=True)
+                                         )
+    return sorted_mean_abs_SHAP_df
+
+# Sorted mean absolute SHAP values
+def mean_abs_SHAP_meta_model(SHAP_values):
+    column_names            = SHAP_values.feature_names
+    if np.ndim(SHAP_values.values) == 2:
+        mean_abs_SHAP_coefs     = np.mean(np.abs(SHAP_values.values), axis=0)
+    if np.ndim(SHAP_values.values) > 2:
+        mean_abs_SHAP_coefs     = np.mean(np.abs(SHAP_values.values[:, :, 1]), axis=0)
+    mean_abs_SHAP_df        = pd.DataFrame({'Feature': column_names,
+                                            'Mean_abs_SHAP': mean_abs_SHAP_coefs})
+    sorted_mean_abs_SHAP_df = (
+                              mean_abs_SHAP_df
+                              .sort_values(by='Mean_abs_SHAP', ascending=False)
+                              .reset_index(drop=True)
+                              )
+    return sorted_mean_abs_SHAP_df
 
 ##########################################
 # Plotting methods
