@@ -5,11 +5,14 @@ files_naming.txt                    This file. Description of files in project.
 README.md                           Overall description of project.
 conda_environment.yml       		File with python packages and dependences to replicate experiments.
 create_cat_files.py         		File to create catalogues for running models.
+plot_moc_files.py           		File to create plots from MOC files for selected Fields.
+plot_surveys_depths.py      		File to create plot with flux depth of used surveys and bands.
 global_functions.py                 File with definitions for functions used in other files.
 global_variables.py                 File with declarations of variables used in other files.
 
 describe_data.ipynb         		File with plots and values describing used datasets before ML application.
 flowchart_pipeline.ipynb    		File to plot flowchart for full prediction pipeline.
+flowchart_set_sizes.ipynb   		File to plot flowcharts for creation of sub-sets of catalogues.
 
 ML_01.ipynb                 		File for training model for star/no-star classification with Recall as loss function.
 ML_02.ipynb                 		File for training model for AGN/galaxy classification with Recall as loss function.
