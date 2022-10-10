@@ -148,8 +148,8 @@ elif AGN_sed == 'rest-frame':
     AGN_flux   = (AGN_flux_l * AGN_wave**2 / c).to(u.Jy)
 
 # Plot bands and depths
-save_plot_flag = False
-show_plot_flag = True
+save_plot_flag = True
+show_plot_flag = False
 
 # original redshift from source
 orig_z = 0.0422  # Mrk231
@@ -222,8 +222,8 @@ elif AGN_sed == 'rest-frame':
     AGN_flux_rf_uJy = AGN_flux.to(u.uJy)
     AGN_flux_uJy    = AGN_flux_rf_uJy
 
-ax2.plot(AGN_wave_rf.value, AGN_flux_rf_uJy.value, zorder=1, color='k',\
-     lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
+#ax2.plot(AGN_wave_rf.value, AGN_flux_rf_uJy.value, zorder=1, color='k',\
+#     lw=2.5, label=f'Mrk231 - rest-frame')  # rest-frame
 ax2.plot(AGN_wave.value, AGN_flux_rf_uJy.value / (1 + orig_z),\
      zorder=1, color='indigo', lw=2.5, label=f'Mrk231 - z={orig_z}', alpha=1.0)  # observed
 max_z_plot = 7
