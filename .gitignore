@@ -230,3 +230,7 @@ temp_notebooks/*
 # Mean SHAP values from meta learners
 tmp_shap/*.h5
 !tmp_shap/README.md
+
+# Indices of sources in sub-set for HETDEX
+subset_indices/*.txt
+!subset_indices/README.md

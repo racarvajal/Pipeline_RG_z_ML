@@ -11,6 +11,7 @@ models_path        = 'models/'
 preds_path         = 'pred_rAGN/'
 moc_path           = 'moc_files/'
 tmp_shap_path      = 'tmp_shap/'
+indices_path       = 'subsets_indices/'
 
 # Boolean flags
 use_5sigma         = True  # use files with 5-sigma magnitude imputation
