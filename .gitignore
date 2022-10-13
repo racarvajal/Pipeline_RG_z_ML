@@ -232,5 +232,5 @@ tmp_shap/*.h5
 !tmp_shap/README.md
 
 # Indices of sources in sub-set for HETDEX
-subset_indices/*.txt
-!subset_indices/README.md
+subsets_indices/*.txt
+!subsets_indices/README.md
