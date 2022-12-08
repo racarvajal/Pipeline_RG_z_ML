@@ -61,6 +61,7 @@ def fix_dtypes(initial_tab):
             initial_tab[col] = initial_tab[col].astype(str)
     # Special case
     initial_tab['QPCT'] = initial_tab['QPCT'].astype(np.int32)
+    initial_tab['TYPE'] = initial_tab['TYPE'].filled('')
     return initial_tab
 
 def create_band_count(mags_df, magnitude_cols, feat_name):
@@ -176,7 +177,8 @@ if run_HETDEX_flag:
     # Select features to impute
     magnitude_cols = [col_name for col_name in HETDEX_initial_tab.colnames if 
                 HETDEX_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI'))]
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI')) and not
+                     col_name.endswith('SDSS')]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_HETDEX]
 
@@ -294,7 +296,8 @@ if run_S82_flag:
     # Select features to impute
     magnitude_cols = [col_name for col_name in S82_initial_tab.colnames if 
                 S82_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI'))]
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI')) and not
+                     col_name.endswith('SDSS')]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_S82]
 
@@ -422,7 +425,8 @@ if run_COSMOS_flag:
     # Select features to impute
     magnitude_cols = [col_name for col_name in COSMOS_initial_tab.colnames if 
                 COSMOS_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI')) and not
+                     col_name.endswith('SDSS')]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_COSMOS]
 
