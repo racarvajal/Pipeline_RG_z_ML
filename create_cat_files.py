@@ -106,21 +106,9 @@ run_COSMOS_flag = False
 
 run_S82_full    = False  # True for use all S82 sources. False for using Ananna+17 sample
 
-run_HETDEX_errors_flag = False
-run_S82_errors_flag    = False
-run_COSMOS_errors_flag = False
-
 save_HETDEX_flag = False
 save_S82_flag    = False
 save_COSMOS_flag = False
-
-save_HETDEX_errors_flag = False
-save_S82_errors_flag    = False
-save_COSMOS_errors_flag = False
-
-if run_HETDEX_errors_flag: run_HETDEX_flag = True
-if run_S82_errors_flag:    run_S82_flag    = True
-if run_COSMOS_errors_flag: run_COSMOS_flag = True
 
 all_vega_cols  = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag',\
                     'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag', 'e_W4mag', 'e_Jmag',\
@@ -401,117 +389,6 @@ if run_S82_flag:
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82, key='df')
         if not run_S82_full:
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82_Ananna_17, key='df')
-
-if run_S82_errors_flag:
-    print('-' * 40)
-    print('Working with Stripe 82 data uncertainties')
-    print('Reading files')
-    S82_initial_tab     = Table.read(gv.cat_path + gv.fits_S82, format='fits')
-
-    print('Fixing dtypes')
-    S82_initial_tab     = fix_dtypes(S82_initial_tab)
-
-    id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']
-    clean_cat_S82_err_df = S82_initial_tab[id_cols].to_pandas()
-
-    zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
-
-    # Vega magnitude uncertainties are equivalent in AB
-
-    mag_err_cols   = ['e_FUVmag', 'e_NUVmag', 'e_gmag', 'e_rmag', 'e_imag', 'e_zmag', 'e_ymag', 'e_Jmag',\
-                     'e_Hmag', 'e_Kmag', 'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag',\
-                     'e_W4mag']
-
-    # Fix units of magnitudes for following steps
-    for col in mag_err_cols:
-        if S82_initial_tab[col].unit == u.mag:
-            S82_initial_tab[col].unit = u.mag(u.AB)
-            S82_initial_tab[col]      = u.Magnitude(S82_initial_tab[col])
-
-    # Remove columns with too high numbe of missing values
-    print('Removing columns with high nullity')
-    removed_cols   = []
-    limit_fraction = 1.00
-    for col in mag_err_cols:
-        filt_temp = np.isfinite(S82_initial_tab[col])
-        removed   = 'NOT REMOVED'
-        if np.sum(~filt_temp) > int(np.ceil(limit_fraction * len(S82_initial_tab[col]))):
-            removed_cols.append(col)
-            mag_err_cols.remove(col)
-            removed = 'REMOVED'
-            print(f'column: {col}\t -\t n_bad: {np.sum(~filt_temp)}\t{removed}')
-
-    mags_errs_S82_df    = S82_initial_tab[mag_err_cols].to_pandas()
-    imputed_errs_S82_df = mags_errs_S82_df.copy()
-
-    # Impute missing error values with zero
-    print('Imputing values')
-    for col in mag_err_cols:
-        imputed_errs_S82_df.loc[np.array(mags_errs_S82_df.loc[:, col] < 0), col] = np.float32(1e-6)
-        imputed_errs_S82_df.loc[:, col] = mags_errs_S82_df.loc[:, col].fillna(np.float32(1e-6), inplace=False)
-
-    # Create uncertainties for derived features
-    print('Creating colour errors')
-    imputed_errs_S82_df['e_g_r']   = (np.sqrt(imputed_errs_S82_df['e_gmag']**2     + imputed_errs_S82_df['e_rmag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_r_i']   = (np.sqrt(imputed_errs_S82_df['e_rmag']**2     + imputed_errs_S82_df['e_imag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_i_z']   = (np.sqrt(imputed_errs_S82_df['e_imag']**2     + imputed_errs_S82_df['e_zmag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_z_y']   = (np.sqrt(imputed_errs_S82_df['e_zmag']**2     + imputed_errs_S82_df['e_ymag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_g_i']   = (np.sqrt(imputed_errs_S82_df['e_gmag']**2     + imputed_errs_S82_df['e_imag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_w1_w2'] = (np.sqrt(imputed_errs_S82_df['e_W1mproPM']**2 + imputed_errs_S82_df['e_W2mproPM']**2)).astype(np.float32)
-    # imputed_errs_S82_df['e_w1_w2'] = np.sqrt(imputed_errs_S82_df['e_W1mag']**2    + imputed_errs_S82_df['e_W2mag']**2)
-    imputed_errs_S82_df['e_w2_w3']      = (np.sqrt(imputed_errs_S82_df['e_W2mag']**2    + imputed_errs_S82_df['e_W3mag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_w3_w4']      = (np.sqrt(imputed_errs_S82_df['e_W3mag']**2    + imputed_errs_S82_df['e_W4mag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_J_H']        = (np.sqrt(imputed_errs_S82_df['e_Jmag']**2     + imputed_errs_S82_df['e_Hmag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_H_K']        = (np.sqrt(imputed_errs_S82_df['e_Hmag']**2     + imputed_errs_S82_df['e_Kmag']**2)).astype(np.float32)
-    imputed_errs_S82_df['e_FUV_NUV']    = (np.sqrt(imputed_errs_S82_df['e_FUVmag']**2   + imputed_errs_S82_df['e_NUVmag']**2)).astype(np.float32)
-
-    print('Creating magnitude ratio errors')
-    imputed_errs_S82_df['e_r/z']   = (imputed_S82_df['r/z'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_rmag'] / imputed_S82_df.loc[:, 'rmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_zmag'] / imputed_S82_df.loc[:, 'zmag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_i/y']   = (imputed_S82_df['i/y'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_imag'] / imputed_S82_df.loc[:, 'imag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_ymag'] / imputed_S82_df.loc[:, 'ymag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_w1/w3'] = (imputed_S82_df['w1/w3'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_W3mag'] / imputed_S82_df.loc[:, 'W3mag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_w1/w4'] = (imputed_S82_df['w1/w4'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_W4mag'] / imputed_S82_df.loc[:, 'W4mag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_w2/w4'] = (imputed_S82_df['w2/w4'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_W2mproPM'] / imputed_S82_df.loc[:, 'W2mproPM'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_W4mag'] / imputed_S82_df.loc[:, 'W4mag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_J/K']   = (imputed_S82_df['J/K'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_Jmag'] / imputed_S82_df.loc[:, 'Jmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_FUV/K'] = (imputed_S82_df['FUV/K'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_FUVmag'] / imputed_S82_df.loc[:, 'FUVmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
-
-    imputed_errs_S82_df['e_g/J']   = (imputed_S82_df['g/J'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_gmag'] / imputed_S82_df.loc[:, 'gmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_Jmag'] / imputed_S82_df.loc[:, 'Jmag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_r/H']   = (imputed_S82_df['r/H'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_rmag'] / imputed_S82_df.loc[:, 'rmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_Hmag'] / imputed_S82_df.loc[:, 'Hmag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_i/K']   = (imputed_S82_df['i/K'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_imag'] / imputed_S82_df.loc[:, 'imag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_Kmag'] / imputed_S82_df.loc[:, 'Kmag'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_z/W1']  = (imputed_S82_df['z/W1'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_zmag'] / imputed_S82_df.loc[:, 'zmag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_W1mproPM'] / imputed_S82_df.loc[:, 'W1mproPM'])**2)).astype(np.float32)
-    imputed_errs_S82_df['e_y/W2']  = (imputed_S82_df['y/W2'] *\
-                                    np.sqrt((imputed_errs_S82_df.loc[:, 'e_ymag'] / imputed_S82_df.loc[:, 'ymag'])**2 +\
-                                    (imputed_errs_S82_df.loc[:, 'e_W2mproPM'] / imputed_S82_df.loc[:, 'W2mproPM'])**2)).astype(np.float32)
-
-    if save_S82_errors_flag:
-        print('Joining all tables')
-        clean_cat_final_S82_err_df = pd.concat([clean_cat_S82_err_df, imputed_errs_S82_df], axis=1)
-        # save new catalogue to a hdf5 file (.h5)
-        print('Saving final table to file')
-        clean_cat_final_S82_err_df.to_hdf(gv.cat_path + file_name_clean_S82_err, key='df')
-
 
 #######
 # Run for COSMOS data
