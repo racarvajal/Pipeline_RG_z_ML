@@ -117,13 +117,6 @@ vega_cols      = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'J
 vega_shift     = {'W1mproPM': 2.699, 'W2mproPM': 3.339, 'W1mag': 2.699, 'W2mag': 3.339, 'W3mag': 5.174,\
                     'W4mag': 6.620, 'Jmag': 0.910, 'Hmag': 1.390, 'Kmag': 1.850}
 
-mag_cols_lim_adhoc  = {'W1mproPM': 22.8, 'W2mproPM': 22.1, 'Sint_LOFAR': 18.9, 'Total_flux_VLASS': 17.2,\
-                    'TotalFlux_LoLSS': 14.65, 'Stotal_TGSS': 13.8, 'Fint_VLAS82': 19.6,\
-                    'Flux_COSMOSVLA3': 21.4, 'W1mag': 21.8, 'W2mag': 21.4, 'W3mag': 18.7,\
-                    'W4mag': 16.7, 'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3,\
-                    'ymag': 21.4, 'FUVmag': 23.5, 'NUVmag': 24.0, 'FEP': 57.9, 'Jmag': 20.0,\
-                    'Hmag': 19.4, 'Kmag': 19.35}  # Original (ad-hoc) limits
-
 mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52, 'Total_flux_VLASS': 15.21,\
                     'TotalFlux_LoLSS': 12.91, 'Stotal_TGSS': 11.18, 'Fint_VLAS82': 17.86,\
                     'Flux_COSMOSVLA3': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67,\
@@ -137,14 +130,12 @@ mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'z',\
                         'ymag': 'y', 'Jmag': 'J', 'Hmag': 'H', 'Kmag': 'K',\
                         'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
 
-for key in mag_cols_lim_adhoc:
-    mag_cols_lim_adhoc[key]  = np.float32(mag_cols_lim_adhoc[key])
 for key in mag_cols_lim_5sigma:
     mag_cols_lim_5sigma[key] = np.float32(mag_cols_lim_5sigma[key])
 
-mag_cols_lim        = {'adhoc': mag_cols_lim_adhoc, '5sigma': mag_cols_lim_5sigma}
+mag_cols_lim        = {'5sigma': mag_cols_lim_5sigma}
 
-AGN_types_list    = {'7_4d': ['Q', 'A', 'B', 'L', 'K', 'N', 'R', 'X', '2'], '7_2': ['Q', 'B', 'L', 'K', 'R', 'X', '2']}
+AGN_types_list    = {'7_4d': ['Q', 'A', 'B', 'L', 'K', 'N', 'R', 'X', '2']}
 
 if run_HETDEX_flag:
     print('-' * 40)
@@ -156,19 +147,12 @@ if run_HETDEX_flag:
     HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl']
     clean_cat_HETDEX_df = HETDEX_initial_tab[id_cols].to_pandas()
 
     zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
 
     print('Convert fluxes to magnitudes')
-    xray_freqs  = {'FEP':            1.51e+18 * u.Hz}
-    xray_cols   = ['FEP']
-    for col in xray_cols:
-        HETDEX_initial_tab[col]       = HETDEX_initial_tab[col] / xray_freqs[col]
-        # HETDEX_initial_tab[col].unit /= u.Hz
-        HETDEX_initial_tab[col].unit  = u.mW * u.m**-2 * u.Hz**-1
-        HETDEX_initial_tab[col]       = HETDEX_initial_tab[col].to(u.mJy)
 
     # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'TotalFlux_LoLSS']
     mJy_cols_HETDEX = [col_name for col_name in HETDEX_initial_tab.colnames if 
@@ -183,8 +167,6 @@ if run_HETDEX_flag:
     for col in vega_cols:
         HETDEX_initial_tab[col] += vega_shift[col]
 
-    # sys.exit()
-
     # Fix units of magnitudes for following steps
     for col in HETDEX_initial_tab.colnames:
         if HETDEX_initial_tab[col].unit == u.mag:
@@ -194,7 +176,7 @@ if run_HETDEX_flag:
     # Select features to impute
     magnitude_cols = [col_name for col_name in HETDEX_initial_tab.colnames if 
                 HETDEX_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI'))]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_HETDEX]
 
@@ -203,8 +185,8 @@ if run_HETDEX_flag:
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
-    imputed_HETDEX_df = create_X_ray_detect(imputed_HETDEX_df, HETDEX_initial_tab)
-    radio_cols_HETDEX = ['Sint_LOFAR', 'Stotal_TGSS', 'TotalFlux_LoLSS', 'Total_flux_VLASS']
+    # imputed_HETDEX_df = create_X_ray_detect(imputed_HETDEX_df, HETDEX_initial_tab)
+    radio_cols_HETDEX = ['Sint_LOFAR']
     imputed_HETDEX_df = create_radio_detect(imputed_HETDEX_df, HETDEX_initial_tab, radio_cols_HETDEX)
 
     # Select, from MQC, sources that have been classified 
@@ -278,23 +260,15 @@ if run_S82_flag:
 
     if run_S82_full:
         id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                    'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # , 'COMMENT']  # zsp for Annana+17
+                    'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl'] # zsp for Annana+17
     if not run_S82_full:
         id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
-                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # , 'COMMENT']  # zsp for Annana+17
+                'DEC_MILLI', 'TYPE', 'Z', 'zsp'] # zsp for Annana+17
     clean_cat_S82_df = S82_initial_tab[id_cols].to_pandas()
 
     zero_point_star_equiv  = u.zero_point_flux(3631.1 * u.Jy)  # zero point (AB) to Jansky
 
     print('Convert fluxes to magnitudes')
-    xray_freqs  = {'FEP':            1.51e+18 * u.Hz}
-    xray_cols   = ['FEP']
-    for col in xray_cols:
-        S82_initial_tab[col]       = S82_initial_tab[col] / xray_freqs[col]
-        # S82_initial_tab[col].unit /= u.Hz
-        S82_initial_tab[col].unit  = u.mW * u.m**-2 * u.Hz**-1
-        S82_initial_tab[col]       = S82_initial_tab[col].to(u.mJy)
-
     # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'Fint_VLAS82']
     mJy_cols_S82 = [col_name for col_name in S82_initial_tab.colnames if 
                 S82_initial_tab[col_name].unit == 'mJy' and not 
@@ -320,7 +294,7 @@ if run_S82_flag:
     # Select features to impute
     magnitude_cols = [col_name for col_name in S82_initial_tab.colnames if 
                 S82_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('QUAS'))]
+                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI'))]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_S82]
 
@@ -329,8 +303,8 @@ if run_S82_flag:
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
-    imputed_S82_df = create_X_ray_detect(imputed_S82_df, S82_initial_tab)
-    radio_cols_S82 = ['Stotal_TGSS', 'Fint_VLAS82', 'Total_flux_VLASS']
+    # imputed_S82_df = create_X_ray_detect(imputed_S82_df, S82_initial_tab)
+    radio_cols_S82 = ['Fint_VLAS82']
     imputed_S82_df = create_radio_detect(imputed_S82_df, S82_initial_tab, radio_cols_S82)
 
     # Select, from MQC, sources that have been classified 
