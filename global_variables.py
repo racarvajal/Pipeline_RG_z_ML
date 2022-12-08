@@ -20,20 +20,34 @@ use_5sigma         = True  # use files with 5-sigma magnitude imputation
 mqc_version        = '7_4d'  # '7_2'
 
 # Catalogue file names
-# Original fits files
-fits_HETDEX         = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16.fits'  # 6729647 objects (6.7e6)
-fits_S82            = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16.fits'
-fits_COSMOS         = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16.fits'
-fits_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp.fits'
+# # Original fits files
+# fits_HETDEX         = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16.fits'  # 6729647 objects (6.7e6)
+# fits_S82            = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16.fits'
+# fits_COSMOS         = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16.fits'
+# fits_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp.fits'
+# # Non imputed h5 files
+# file_non_imp_HETDEX = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16_non_imp.h5'
+# file_non_imp_S82    = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_non_imp.h5'
+# file_non_imp_COSMOS = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16_non_imp.h5'
+# # Imputed h5 files
+# file_HETDEX         = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16_5sigma_imp.h5'  # 6729647 objects (6.7e6)
+# file_S82            = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_5sigma_imp.h5'
+# file_COSMOS         = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16_5sigma_imp.h5'
+# file_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp_5sigma_imp.h5'
+# New Catalogue file names
+fits_HETDEX         = 'CatWISE2020_LoTSS_area_large_LoTSS_PS1_ALLWISE_2MASS_MQC_74D_SDSS_DR16.fits'  # 15136878 objects (1.5e7)
+fits_S82            = 'CatWISE2020_VLAS82_area_large_VLAS82_PS1_ALLWISE_2MASS_MQC_74D_SDSS_DR16.fits'  # 3590306 objects
+fits_COSMOS         = ''
+fits_S82_Ananna_17  = 'CatWISE2020_VLAS82_area_large_VLAS82_PS1_ALLWISE_2MASS_MQC_74D_SDSS_DR16_Ananna_17.fits'  # 2558 objects
 # Non imputed h5 files
-file_non_imp_HETDEX = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16_non_imp.h5'
-file_non_imp_S82    = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_non_imp.h5'
-file_non_imp_COSMOS = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16_non_imp.h5'
+file_non_imp_HETDEX = fits_HETDEX.replace('.fits', '_non_imp.h5')
+file_non_imp_S82    = fits_S82.replace('.fits', '_non_imp.h5')
+file_non_imp_COSMOS = fits_COSMOS.replace('.fits', '_non_imp.h5')
 # Imputed h5 files
-file_HETDEX         = 'CatWISE2020_VLASS_LOFAR_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_LOLSS_SDSS_DR16_5sigma_imp.h5'  # 6729647 objects (6.7e6)
-file_S82            = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_5sigma_imp.h5'
-file_COSMOS         = 'CatWISE2020_COSMOS_MILLIQUAS_7_4d_COSMOSVLA3_PS1_GALEX_TGSS_VLASS_XMM_2MASS_ALLWISE_SDSS_DR16_5sigma_imp.h5'
-file_S82_Ananna_17  = 'CatWISE2020_S82_VLASS_VLAS82_PS1_GALEX_TGSS_XMM_2MASS_MILLIQUAS_7_4d_ALLWISE_SDSS_DR16_Ananna_17_zsp_5sigma_imp.h5'
+file_HETDEX         = fits_HETDEX.replace('.fits', '_imp.h5')  # 15136878 objects (1.5e7)
+file_S82            = fits_S82.replace('.fits', '_imp.h5')
+file_COSMOS         = fits_COSMOS.replace('.fits', '_imp.h5')
+file_S82_Ananna_17  = fits_S82_Ananna_17.replace('.fits', '_imp.h5')
 
 # Fields properties
 # Areas (deg2)
@@ -42,16 +56,26 @@ area_S82            = 92
 area_COSMOS         = 4  # Not real value. Placeholder
 
 # Model names with train, test, calibration, and validation sub-sets
+# # Old Stacked models
+# star_model         = 'classification_star_no_star_ago_29_2022'
+# AGN_gal_model      = 'classification_AGN_galaxy_ago_30_2022'
+# radio_model        = 'classification_LOFAR_detect_sep_07_2022'
+# full_z_model       = 'regression_z_sep_09_2022'
+# high_z_model       = 'regression_high_z_sep_10_2022'
+# # Old Calibrated models
+# cal_str_model      = 'cal_classification_star_no_star_ago_29_2022.joblib'
+# cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_30_2022.joblib'
+# cal_radio_model    = 'cal_classification_LOFAR_detect_sep_07_2022.joblib'
 # Stacked models
-star_model         = 'classification_star_no_star_ago_29_2022'
-AGN_gal_model      = 'classification_AGN_galaxy_ago_30_2022'
-radio_model        = 'classification_LOFAR_detect_sep_07_2022'
-full_z_model       = 'regression_z_sep_09_2022'
-high_z_model       = 'regression_high_z_sep_10_2022'
+star_model         = 'classification_star_no_star_dec_07_2022'
+AGN_gal_model      = 'classification_AGN_galaxy_dec_08_2022'
+radio_model        = 'classification_LOFAR_detect_dec_09_2022'
+full_z_model       = 'regression_z_dec_10_2022'
+high_z_model       = 'regression_high_z_dec_11_2022'
 # Calibrated models
-cal_str_model      = 'cal_classification_star_no_star_ago_29_2022.joblib'
-cal_AGN_gal_model  = 'cal_classification_AGN_galaxy_ago_30_2022.joblib'
-cal_radio_model    = 'cal_classification_LOFAR_detect_sep_07_2022.joblib'
+cal_str_model      = 'cal_' + star_model    + '.joblib'
+cal_AGN_gal_model  = 'cal_' + AGN_gal_model + '.joblib'
+cal_radio_model    = 'cal_' + radio_model   + '.joblib'
 
 # Seeds
 seed               = 42
