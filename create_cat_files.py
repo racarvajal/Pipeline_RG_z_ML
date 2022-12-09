@@ -105,7 +105,7 @@ run_HETDEX_flag = False
 run_S82_flag    = False
 run_COSMOS_flag = False
 
-run_S82_full    = False  # True for use all S82 sources. False for using Ananna+17 sample
+run_S82_full    = True  # True for use all S82 sources. False for using Ananna+17 sample
 
 save_HETDEX_flag = False
 save_S82_flag    = False
