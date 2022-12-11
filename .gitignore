@@ -221,6 +221,7 @@ plots/*
 
 # Catalogues of predicted sources
 pred_rAGN/*.csv
+pred_rAGN/*.h5
 !pred_rAGN/README.md
 
 # Temporary notebooks
