@@ -90,10 +90,18 @@ def outlier_frac(z_true, z_pred, **kwargs):
 ##########################################
 # Obtain classification metrics from confusion matrices
 def conf_mat_func(true_class_arr, predicted_class_arr):
-    cm = np.array([[np.sum(np.array(true_class_arr == 0) & np.array(predicted_class_arr == 0)),\
-                    np.sum(np.array(true_class_arr == 0) & np.array(predicted_class_arr == 1))],\
-                   [np.sum(np.array(true_class_arr == 1) & np.array(predicted_class_arr == 0)),\
+    cm = np.array([[np.sum(np.array(true_class_arr == 0) & np.array(predicted_class_arr == 0)),
+                    np.sum(np.array(true_class_arr == 0) & np.array(predicted_class_arr == 1))],
+                   [np.sum(np.array(true_class_arr == 1) & np.array(predicted_class_arr == 0)),
                     np.sum(np.array(true_class_arr == 1) & np.array(predicted_class_arr == 1))]])
+    return cm
+
+def conf_mat_random(true_class_arr):
+    class_prob = np.sum(np.array(true_class_arr == 1)) / np.shape(true_class_arr)[0]
+    cm = np.array([[(1 - class_prob) * np.sum(np.array(true_class_arr == 0)),
+                    class_prob * np.sum(np.array(true_class_arr == 0))],
+                   [(1 - class_prob) * np.sum(np.array(true_class_arr == 1)),
+                    class_prob * np.sum(np.array(true_class_arr == 1))]])
     return cm
 
 def flatten_CM(cm_array, **kwargs):
@@ -152,10 +160,10 @@ def create_scores_df(list_of_cms, list_of_sets, list_of_scores):
         Recall[count]    = Recall_from_CM(cm)
         ACC[count]       = ACC_from_CM(cm)
         
-    scores_array  = np.transpose(np.array([[Fb[key]        for key in Fb],\
-                                           [MCC[key]       for key in MCC],\
-                                           [Precision[key] for key in Precision],\
-                                           [Recall[key]    for key in Recall],\
+    scores_array  = np.transpose(np.array([[Fb[key]        for key in Fb],
+                                           [MCC[key]       for key in MCC],
+                                           [Precision[key] for key in Precision],
+                                           [Recall[key]    for key in Recall],
                                            [ACC[key]       for key in ACC]]))
     scores_df = pd.DataFrame(data=scores_array, columns=list_of_scores, index=list_of_sets)
     return scores_df
@@ -367,8 +375,8 @@ def obtain_optimised_hyperpars(pycaret_pipeline, meta_model_name, pred_type='cla
     # Merge dictionaries
     models_params_meta_df = pd.DataFrame.from_dict(model_params_opt_meta)
     models_params_base_df = pd.DataFrame.from_dict(model_params_opt_base)
-    models_params_base_df = pd.DataFrame(models_params_base_df.to_numpy(),\
-                                         index=list(np.arange(1, len(base_names) + 1)),\
+    models_params_base_df = pd.DataFrame(models_params_base_df.to_numpy(),
+                                         index=list(np.arange(1, len(base_names) + 1)),
                                          columns=models_params_base_df.columns)
     models_params_df      = pd.concat([models_params_meta_df, models_params_base_df]).transpose()
     full_names            = [meta_model_name] +  base_names
