@@ -245,8 +245,17 @@ if run_HETDEX_flag:
         print('Saving final table to file')
         cat_final_non_imp_HETDEX_df.to_hdf(gv.cat_path + gv.file_non_imp_HETDEX, key='df')
         clean_cat_final_HETDEX_df.to_hdf(gv.cat_path + gv.file_HETDEX, key='df')
+        cat_final_non_imp_HETDEX_df.to_parquet(gv.cat_path + gv.file_non_imp_HETDEX.replace('.h5', '.parquet'), 
+                                               index=True, engine='fastparquet')
+        clean_cat_final_HETDEX_df.to_parquet(gv.cat_path + gv.file_HETDEX.replace('.h5', '.parquet'), 
+                                             index=True, engine='fastparquet')
+        
         cat_final_non_imp_HETDEX_df.loc[:, mag_cols_for_colours].to_hdf(gv.preds_path + 'HETDEX_mags_non_imputed.h5', key='df')
         clean_cat_final_HETDEX_df.loc[:, mag_cols_for_colours].to_hdf(gv.preds_path + 'HETDEX_mags_imputed.h5', key='df')
+        cat_final_non_imp_HETDEX_df.loc[:, mag_cols_for_colours].to_parquet(gv.preds_path + 'HETDEX_mags_non_imputed.parquet',
+                                                                            index=True, engine='fastparquet')
+        clean_cat_final_HETDEX_df.loc[:, mag_cols_for_colours].to_parquet(gv.preds_path + 'HETDEX_mags_imputed.parquet', 
+                                                                          index=True, engine='fastparquet')
 
 #######
 
@@ -366,8 +375,17 @@ if run_S82_flag:
         if run_S82_full:
             cat_final_non_imp_S82_df.to_hdf(gv.cat_path + gv.file_non_imp_S82, key='df')
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82, key='df')
+            cat_final_non_imp_S82_df.to_parquet(gv.cat_path + gv.file_non_imp_S82.replace('.h5', '.parquet'), 
+                                                index=True, engine='fastparquet')
+            clean_cat_final_S82_df.to_parquet(gv.cat_path + gv.file_S82.replace('.h5', '.parquet'), 
+                                              index=True, engine='fastparquet')
+            
             cat_final_non_imp_S82_df.loc[:, mag_cols_for_colours].to_hdf(gv.preds_path + 'S82_mags_non_imputed.h5', key='df')
             clean_cat_final_S82_df.loc[:, mag_cols_for_colours].to_hdf(gv.preds_path + 'S82_mags_imputed.h5', key='df')
+            cat_final_non_imp_S82_df.loc[:, mag_cols_for_colours].to_parquet(gv.preds_path + 'S82_mags_non_imputed.parquet', 
+                                                                             index=True, engine='fastparquet')
+            clean_cat_final_S82_df.loc[:, mag_cols_for_colours].to_parquet(gv.preds_path + 'S82_mags_imputed.parquet', 
+                                                                           index=True, engine='fastparquet')
         if not run_S82_full:
             clean_cat_final_S82_df.to_hdf(gv.cat_path + gv.file_S82_Ananna_17, key='df')
 

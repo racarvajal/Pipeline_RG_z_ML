@@ -222,6 +222,7 @@ plots/*
 # Catalogues of predicted sources
 pred_rAGN/*.csv
 pred_rAGN/*.h5
+pred_rAGN/*.parquet
 !pred_rAGN/README.md
 
 # Temporary notebooks
@@ -230,6 +231,7 @@ temp_notebooks/*
 
 # Mean SHAP values from meta learners
 tmp_shap/*.h5
+tmp_shap/*.parquet
 !tmp_shap/README.md
 
 # Indices of sources in sub-set for HETDEX
