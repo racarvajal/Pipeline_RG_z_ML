@@ -101,35 +101,37 @@ file_name_clean_S82_err    = gv.fits_S82.replace('.fits', '_err_5sigma_imp.h5') 
 # file_name_clean_S82_err    = gv.fits_S82_Ananna_17.replace('.fits', '_err_5sigma_imp.h5')  # h5 file, temp line
 file_name_clean_COSMOS_err = gv.fits_COSMOS.replace('.fits', '_err_5sigma_imp.h5')      # h5 file
 
-run_HETDEX_flag = True
-run_S82_flag    = True
-run_COSMOS_flag = False
+run_HETDEX_flag  = True
+run_S82_flag     = True
+run_COSMOS_flag  = False
 
-run_S82_full    = True  # True for use all S82 sources. False for using Ananna+17 sample
+run_S82_full     = True  # True for use all S82 sources. False for using Ananna+17 sample
 
 save_HETDEX_flag = True
 save_S82_flag    = True
 save_COSMOS_flag = False
 
-all_vega_cols  = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag',\
-                    'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag', 'e_W4mag', 'e_Jmag',\
-                    'e_Hmag', 'e_Kmag']
+all_vega_cols  = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag',
+                  'e_W1mproPM', 'e_W2mproPM', 'e_W1mag', 'e_W2mag', 'e_W3mag', 'e_W4mag', 'e_Jmag',
+                  'e_Hmag', 'e_Kmag']
 vega_cols      = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'Jmag', 'Hmag', 'Kmag']
-vega_shift     = {'W1mproPM': 2.699, 'W2mproPM': 3.339, 'W1mag': 2.699, 'W2mag': 3.339, 'W3mag': 5.174,\
-                    'W4mag': 6.620, 'Jmag': 0.910, 'Hmag': 1.390, 'Kmag': 1.850}
+vega_shift     = {'W1mproPM': 2.699, 'W2mproPM': 3.339, 'W1mag': 2.699, 'W2mag': 3.339, 'W3mag': 5.174,
+                  'W4mag': 6.620, 'Jmag': 0.910, 'Hmag': 1.390, 'Kmag': 1.850}
 
-mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52, 'Total_flux_VLASS': 15.21,\
-                    'TotalFlux_LoLSS': 12.91, 'Stotal_TGSS': 11.18, 'Fint_VLAS82': 17.86,\
-                    'Flux_COSMOSVLA3': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67,\
-                    'W4mag': 14.62, 'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3,\
-                    'ymag': 21.4, 'FUVmag': 20.0, 'NUVmag': 21.0, 'FEP': 57.9, 'Jmag': 17.45,\
-                    'Hmag': 17.24, 'Kmag': 16.59}  # Proper (5-sigma) limits
+mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52, 'Total_flux_VLASS': 15.21,
+                       'TotalFlux_LoLSS': 12.91, 'Stotal_TGSS': 11.18, 'Fint_VLAS82': 17.86,
+                       'Flux_COSMOSVLA3': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67, 'W4mag': 14.62, 
+                       'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3, 'ymag': 21.4, 'FUVmag': 20.0, 
+                       'NUVmag': 21.0, 'FEP': 57.9, 'Jmag': 17.45, 'Hmag': 17.24, 'Kmag': 16.59}  # Proper (5-sigma) limits
 
-mag_cols_for_colours = ['gmag', 'rmag', 'imag', 'zmag', 'ymag', 'Jmag', 'Hmag',\
+flx_cols_lim_5sigma = {col: (mag_cols_lim_5sigma[col + '_AB'] * u.mag(u.AB)).to(u.mJy).value for col in ['Sint_LOFAR', 'Total_flux_VLASS',
+                                                                                                 'TotalFlux_LoLSS', 'Stotal_TGSS', 
+                                                                                                 'Fint_VLAS82', 'Flux_COSMOSVLA3']}  # in mJy
+
+mag_cols_for_colours = ['gmag', 'rmag', 'imag', 'zmag', 'ymag', 'Jmag', 'Hmag',
                         'Kmag', 'W1mproPM', 'W2mproPM', 'W3mag', 'W4mag']
-mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'z',\
-                        'ymag': 'y', 'Jmag': 'J', 'Hmag': 'H', 'Kmag': 'K',\
-                        'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
+mag_names_short      = {'gmag': 'g', 'rmag': 'r', 'imag': 'i', 'zmag': 'z', 'ymag': 'y', 
+                        'Jmag': 'J', 'Hmag': 'H', 'Kmag': 'K', 'W1mproPM': 'W1', 'W2mproPM': 'W2', 'W3mag': 'W3', 'W4mag': 'W4'}
 
 for key in mag_cols_lim_5sigma:
     mag_cols_lim_5sigma[key] = np.float32(mag_cols_lim_5sigma[key])
@@ -146,6 +148,14 @@ if run_HETDEX_flag:
 
     print('Fixing dtypes')
     HETDEX_initial_tab     = fix_dtypes(HETDEX_initial_tab)
+    try:
+        HETDEX_initial_tab['Speak_LOFAR'] = HETDEX_initial_tab['Speak_LOFAR'].filled(np.nan)
+    except:
+        pass
+    try:
+        HETDEX_initial_tab['rms_LOFAR'] = HETDEX_initial_tab['rms_LOFAR'].filled(np.nan)
+    except:
+        pass
 
     id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
                 'DEC_MILLI', 'TYPE', 'Z', 'zsp', 'spCl']
@@ -157,11 +167,17 @@ if run_HETDEX_flag:
 
     # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'TotalFlux_LoLSS']
     mJy_cols_HETDEX = [col_name for col_name in HETDEX_initial_tab.colnames if 
-                HETDEX_initial_tab[col_name].unit == 'mJy' and not 
-                (col_name.startswith('e') or col_name.startswith('E'))]
+                       HETDEX_initial_tab[col_name].unit == 'mJy' and not 
+                       (col_name.startswith('e') or col_name.startswith('E'))]
+    
+    for col in mJy_cols_HETDEX:
+        try:
+            HETDEX_initial_tab[col] = HETDEX_initial_tab[col].filled(np.nan)
+        except:
+            pass
 
     for col in mJy_cols_HETDEX:
-        HETDEX_initial_tab[col] = HETDEX_initial_tab[col].to(u.mag(u.AB))
+        HETDEX_initial_tab[col + '_AB'] = HETDEX_initial_tab[col].to(u.mag(u.AB))
 
     # Transform Vega magnitudes to AB magnitudes
     print('Transforming Vega to AB')
@@ -176,13 +192,16 @@ if run_HETDEX_flag:
 
     # Select features to impute
     magnitude_cols = [col_name for col_name in HETDEX_initial_tab.colnames if 
-                HETDEX_initial_tab[col_name].unit == u.mag(u.AB) and not 
-                (col_name.startswith('e') or col_name.startswith('E') or col_name.endswith('MILLI')) and not
-                     col_name.endswith('SDSS')]
+                      HETDEX_initial_tab[col_name].unit == u.mag(u.AB) and not 
+                      (col_name.startswith('e') or col_name.startswith('E') or 
+                       col_name.endswith('MILLI')) and not
+                      col_name.endswith('SDSS')]
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_HETDEX]
 
+    radio_cols_HETDEX   = ['Sint_LOFAR']
     mags_HETDEX_df      = HETDEX_initial_tab[magnitude_cols].to_pandas()
+    flxs_HETDEX_df      = HETDEX_initial_tab[radio_cols_HETDEX].to_pandas()
     imputed_HETDEX_df   = pd.DataFrame()
 
     # Create flags for X-ray and radio detection, and AGN classification
@@ -190,6 +209,17 @@ if run_HETDEX_flag:
     # imputed_HETDEX_df = create_X_ray_detect(imputed_HETDEX_df, HETDEX_initial_tab)
     radio_cols_HETDEX = ['Sint_LOFAR']
     imputed_HETDEX_df = create_radio_detect(imputed_HETDEX_df, HETDEX_initial_tab, radio_cols_HETDEX)
+    
+    # Add radio measurements to final table
+    imputed_HETDEX_df['Sint_LOFAR']    = HETDEX_initial_tab['Sint_LOFAR']
+    imputed_HETDEX_df['Sint_LOFAR_AB'] = HETDEX_initial_tab['Sint_LOFAR_AB']
+    imputed_HETDEX_df['Speak_LOFAR']   = HETDEX_initial_tab['Speak_LOFAR']
+    imputed_HETDEX_df['rms_LOFAR']     = HETDEX_initial_tab['rms_LOFAR']
+    
+    # Copy radio measurements without imputation
+    imputed_HETDEX_df['Sint_LOFAR_non_imp']    = HETDEX_initial_tab['Sint_LOFAR'].copy()
+    imputed_HETDEX_df['Sint_LOFAR_AB_non_imp'] = HETDEX_initial_tab['Sint_LOFAR_AB'].copy()
+    imputed_HETDEX_df['Speak_LOFAR_non_imp']   = HETDEX_initial_tab['Speak_LOFAR'].copy()
 
     # Select, from MQC, sources that have been classified 
     # as host-dominated NLAGN, AGN, or QSO candidates.
@@ -222,8 +252,17 @@ if run_HETDEX_flag:
     for col in magnitude_cols:
         imputed_HETDEX_df.loc[:, col] = mags_HETDEX_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
         imputed_HETDEX_df.loc[:, col] = imputed_HETDEX_df.loc[:, col].mask(imputed_HETDEX_df.loc[:, col] >\
-             mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+                                                                           mag_cols_lim['5sigma'][col], 
+                                                                           mag_cols_lim['5sigma'][col], 
+                                                                           inplace=False)
         non_imputed_HETDEX_df.loc[:, col] = mags_HETDEX_df.loc[:, col]
+        
+    for col in radio_cols_HETDEX:
+        imputed_HETDEX_df.loc[:, col]     = flxs_HETDEX_df.loc[:, col].fillna(np.float32(flx_cols_lim_5sigma[col]), inplace=False)
+        imputed_HETDEX_df.loc[:, col]     = imputed_HETDEX_df.loc[:, col].mask(imputed_HETDEX_df.loc[:, col] <\
+                                                                           flx_cols_lim_5sigma[col], 
+                                                                           flx_cols_lim_5sigma[col], inplace=False)
+        non_imputed_HETDEX_df.loc[:, col] = flxs_HETDEX_df.loc[:, col]
 
     # Create derived features
     print('Creating colours')
@@ -270,6 +309,10 @@ if run_S82_flag:
 
     print('Fixing dtypes')
     S82_initial_tab     = fix_dtypes(S82_initial_tab)
+    try:
+        S82_initial_tab['rms_VLAS82']   = S82_initial_tab['rms_VLAS82'].filled(np.nan)
+    except:
+        pass
 
     if run_S82_full:
         id_cols = ['objID', 'RA_ICRS', 'DE_ICRS', 'Name', 'RA_MILLI', 
@@ -284,11 +327,17 @@ if run_S82_flag:
     print('Convert fluxes to magnitudes')
     # flx_cols = ['Total_flux_VLASS', 'Sint_LOFAR', 'Stotal_TGSS', 'FEP', 'Fint_VLAS82']
     mJy_cols_S82 = [col_name for col_name in S82_initial_tab.colnames if 
-                S82_initial_tab[col_name].unit == 'mJy' and not 
-                (col_name.startswith('e') or col_name.startswith('E')) and not 'rms' in col_name]
+                    S82_initial_tab[col_name].unit == 'mJy' and not 
+                    (col_name.startswith('e') or col_name.startswith('E')) and not 'rms' in col_name]
+    
+    for col in mJy_cols_S82:
+        try:
+            S82_initial_tab[col] = S82_initial_tab[col].filled(np.nan)
+        except:
+            pass
 
     for col in mJy_cols_S82:
-        S82_initial_tab[col] = S82_initial_tab[col].to(u.mag(u.AB))
+        S82_initial_tab[col + '_AB'] = S82_initial_tab[col].to(u.mag(u.AB))
 
     # Transform Vega magnitudes to AB magnitudes
     print('Transforming Vega to AB')
@@ -312,8 +361,14 @@ if run_S82_flag:
 
     magnitude_cols_non_radio = [mag for mag in magnitude_cols if mag not in mJy_cols_S82]
 
+    radio_cols_S82   = ['Fint_VLAS82']
     mags_S82_df      = S82_initial_tab[magnitude_cols].to_pandas()
+    flxs_S82_df      = S82_initial_tab[radio_cols_S82].to_pandas()
     imputed_S82_df   = pd.DataFrame()
+    
+    # Copy radio measurements without imputation
+    imputed_S82_df['Fint_VLAS82_non_imp']    = S82_initial_tab['Fint_VLAS82'].copy()
+    imputed_S82_df['Fint_VLAS82_AB_non_imp'] = S82_initial_tab['Fint_VLAS82_AB'].copy()
 
     # Create flags for X-ray and radio detection, and AGN classification
     print('Creating flags for X-ray and radio detections')
@@ -351,8 +406,15 @@ if run_S82_flag:
     for col in magnitude_cols:
         imputed_S82_df.loc[:, col] = mags_S82_df.loc[:, col].fillna(np.float32(mag_cols_lim['5sigma'][col]), inplace=False)
         imputed_S82_df.loc[:, col] = imputed_S82_df.loc[:, col].mask(imputed_S82_df.loc[:, col] >\
-             mag_cols_lim['5sigma'][col], mag_cols_lim['5sigma'][col], inplace=False)
+                                                                     mag_cols_lim['5sigma'][col], 
+                                                                     mag_cols_lim['5sigma'][col], inplace=False)
         non_imputed_S82_df.loc[:, col] = mags_S82_df.loc[:, col]
+    for col in radio_cols_S82:
+        imputed_S82_df.loc[:, col]     = flxs_S82_df.loc[:, col].fillna(np.float32(flx_cols_lim_5sigma[col]), inplace=False)
+        imputed_S82_df.loc[:, col]     = imputed_S82_df.loc[:, col].mask(imputed_S82_df.loc[:, col] <\
+                                                                           flx_cols_lim_5sigma[col], 
+                                                                           flx_cols_lim_5sigma[col], inplace=False)
+        non_imputed_S82_df.loc[:, col] = flxs_S82_df.loc[:, col]
 
     # Create derived features
     print('Creating colours')
