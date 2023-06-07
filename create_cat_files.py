@@ -118,15 +118,15 @@ vega_cols      = ['W1mproPM', 'W2mproPM', 'W1mag', 'W2mag', 'W3mag', 'W4mag', 'J
 vega_shift     = {'W1mproPM': 2.699, 'W2mproPM': 3.339, 'W1mag': 2.699, 'W2mag': 3.339, 'W3mag': 5.174,
                   'W4mag': 6.620, 'Jmag': 0.910, 'Hmag': 1.390, 'Kmag': 1.850}
 
-mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR': 17.52, 'Total_flux_VLASS': 15.21,
-                       'TotalFlux_LoLSS': 12.91, 'Stotal_TGSS': 11.18, 'Fint_VLAS82': 17.86,
-                       'Flux_COSMOSVLA3': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67, 'W4mag': 14.62, 
+mag_cols_lim_5sigma = {'W1mproPM': 20.13, 'W2mproPM': 19.81, 'Sint_LOFAR_AB': 17.52, 'Total_flux_VLASS_AB': 15.21,
+                       'TotalFlux_LoLSS_AB': 12.91, 'Stotal_TGSS_AB': 11.18, 'Fint_VLAS82_AB': 17.86, 
+                       'Flux_COSMOSVLA3_AB': 21.25, 'W1mag': 19.6, 'W2mag': 19.34, 'W3mag': 16.67, 'W4mag': 14.62, 
                        'gmag': 23.3, 'rmag': 23.2, 'imag': 23.1, 'zmag': 22.3, 'ymag': 21.4, 'FUVmag': 20.0, 
                        'NUVmag': 21.0, 'FEP': 57.9, 'Jmag': 17.45, 'Hmag': 17.24, 'Kmag': 16.59}  # Proper (5-sigma) limits
 
 flx_cols_lim_5sigma = {col: (mag_cols_lim_5sigma[col + '_AB'] * u.mag(u.AB)).to(u.mJy).value for col in ['Sint_LOFAR', 'Total_flux_VLASS',
-                                                                                                 'TotalFlux_LoLSS', 'Stotal_TGSS', 
-                                                                                                 'Fint_VLAS82', 'Flux_COSMOSVLA3']}  # in mJy
+                                                                                                         'TotalFlux_LoLSS', 'Stotal_TGSS', 
+                                                                                                         'Fint_VLAS82', 'Flux_COSMOSVLA3']}  # in mJy
 
 mag_cols_for_colours = ['gmag', 'rmag', 'imag', 'zmag', 'ymag', 'Jmag', 'Hmag',
                         'Kmag', 'W1mproPM', 'W2mproPM', 'W3mag', 'W4mag']
