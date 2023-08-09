@@ -214,6 +214,9 @@ catboost_info/*
 models/*
 !models/README.md
 
+# json moc files
+moc_files/*.json
+
 # Figures created and saved
 plots/*
 !plots/README.md
