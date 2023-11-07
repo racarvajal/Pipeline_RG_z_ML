@@ -616,7 +616,7 @@ def plot_shap_decision(pred_type, model_name, shap_values, shap_explainer, col_n
                             auto_size_plot=False,
                             show=False, xlim=xlim,
                             feature_display_range=slice(-1, -(len(shap_values.feature_names) +1), -1),
-                            new_base_value=new_base_value, kwargs)
+                            new_base_value=new_base_value, **kwargs)
     if np.ndim(shap_values.values) > 2:
         shap.plots.decision(base_value=shap_explainer.expected_value[-1],
                             shap_values=(shap_values.values)[:, :, 1],
@@ -625,7 +625,7 @@ def plot_shap_decision(pred_type, model_name, shap_values, shap_explainer, col_n
                             auto_size_plot=False,
                             show=False, xlim=None,
                             feature_display_range=slice(-1, -(len(shap_values.feature_names) +1), -1),
-                            new_base_value=new_base_value, kwargs)
+                            new_base_value=new_base_value, **kwargs)
     ax.tick_params('x', labelsize=14)
     ax.xaxis.get_offset_text().set_fontsize(14)
     #ax1.xaxis.get_offset_text().set_position((0,1))
