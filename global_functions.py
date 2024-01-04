@@ -528,21 +528,30 @@ def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap=
         norm = ImageNormalize(vmin=0., stretch=PowerStretch(0.5))
 
     filt_pair_z   = np.isfinite(true_z) & np.isfinite(predicted_z)
-    max_for_range = np.nanmax([np.nanmax(1 + true_z.loc[filt_pair_z]), np.nanmax(1 + predicted_z.loc[filt_pair_z])])
+    min_for_range = np.nanmin([np.nanmin(1 + true_z.loc[filt_pair_z]), 
+                               np.nanmin(1 + predicted_z.loc[filt_pair_z])])
+    max_for_range = np.nanmax([np.nanmax(1 + true_z.loc[filt_pair_z]), 
+                               np.nanmax(1 + predicted_z.loc[filt_pair_z])])
+    bins_z        = np.logspace(np.log10(min_for_range), np.log10(max_for_range), num=4*dpi)       
 
-    dens_1 = ax_pre.scatter_density((1 + true_z.sample(frac=1, random_state=gv.seed)),\
-            (1 + predicted_z.sample(frac=1, random_state=gv.seed)),\
-            cmap=plt.get_cmap(cmap), zorder=0, dpi=dpi, norm=norm, alpha=0.93)
+    # Fix colormap to have 0=>white
+    cmap_m       = plt.get_cmap(cmap)
+    cmap_list    = [cmap_m(i) for i in range(cmap_m.N)]
+    cmap_list[0] = (1., 1., 1., 1.)
+    cmap_mod     = mcolors.LinearSegmentedColormap.from_list(cmap + '_mod', cmap_list, cmap_m.N)
+
+    _, _, _, hist_sources_rGal = ax_pre.hist2d((1 + true_z), (1 + predicted_z), 
+                                               bins=bins_z, cmin=1, cmap=cmap_mod, norm=norm)
     
     ax_pre.axline((2., 2.), (3., 3.), ls='--', marker=None, c='Gray', alpha=0.8, lw=3.0, zorder=20)
     ax_pre.axline(xy1=(1., 1.15), xy2=(2., 2.3), ls='-.', marker=None, c='slateblue', alpha=0.6, lw=3.0, zorder=20)
     ax_pre.axline(xy1=(1., 0.85), xy2=(2., 1.7), ls='-.', marker=None, c='slateblue', alpha=0.6, lw=3.0, zorder=20)
 
     if show_clb:
-        clb = plt.colorbar(dens_1, extend='neither', norm=norm, ticks=mtick.MaxNLocator(integer=True))
-        clb.ax.tick_params(labelsize=14)
+        clb = plt.colorbar(hist_sources_rGal, extend='neither', norm=norm, ticks=mtick.MaxNLocator(integer=True))
+        clb.ax.tick_params(labelsize=26)
         clb.outline.set_linewidth(2.5)
-        clb.ax.set_ylabel('Elements per pixel', size=16, path_effects=pe2)
+        clb.ax.set_ylabel('Elements per pixel', size=28, path_effects=pe2)
 
     # Inset axis with residuals
     axins = inset_axes(ax_pre, width='35%', height='20%', loc=2)
@@ -550,31 +559,35 @@ def plot_redshift_compare(true_z, predicted_z, ax_pre, title=None, dpi=10, cmap=
     axins.hist(res_z_z, histtype='stepfilled', fc='grey', ec='k', bins=50, lw=2.5)
     axins.axvline(x=np.nanpercentile(res_z_z, [15.9]), ls='--', lw=2.5, c='royalblue')
     axins.axvline(x=np.nanpercentile(res_z_z, [84.1]), ls='--', lw=2.5, c='royalblue')
-    axins.set_xlabel('$\Delta \mathit{z} / (1 + \mathit{z}_{\mathrm{True}})$', fontsize=10)
+    axins.set_xlabel('$\Delta \mathit{z} / (1 + \mathit{z}_{\mathrm{True}})$', 
+                    fontsize=19, path_effects=pe2)
     axins.tick_params(labelleft=False, labelbottom=True)
     axins.tick_params(which='both', top=True, right=True, direction='in')
-    axins.tick_params(axis='both', which='major', labelsize=10)
+    axins.tick_params(axis='both', which='major', labelsize=19)
     axins.tick_params(which='major', length=8, width=1.5)
     axins.tick_params(which='minor', length=4, width=1.5)
     plt.setp(axins.spines.values(), linewidth=2.5)
     plt.setp(axins.spines.values(), linewidth=2.5)
     axins.set_xlim(left=-0.9, right=0.9)
     ##
-    ax_pre.set_xlabel('$1 + \mathit{z}_{\mathrm{True}}$', fontsize=20)
-    ax_pre.set_ylabel('$1 + \mathit{z}_{\mathrm{Predicted}}$', fontsize=20)
+    ax_pre.set_xlabel('$1 + \mathit{z}_{\mathrm{True}}$', fontsize=32)
+    ax_pre.set_ylabel('$1 + \mathit{z}_{\mathrm{Predicted}}$', fontsize=32)
     ax_pre.tick_params(which='both', top=True, right=True, direction='in')
-    ax_pre.tick_params(axis='both', which='minor', labelsize=14)
+    ax_pre.tick_params(axis='both', which='minor', labelsize=24.5)
+    ax_pre.tick_params(axis='both', which='major', labelsize=24.5)
     ax_pre.tick_params(which='major', length=8, width=1.5)
     ax_pre.tick_params(which='minor', length=4, width=1.5)
     # ax_pre.xaxis.set_major_locator(mtick.MaxNLocator(integer=True))
     # ax_pre.yaxis.set_major_locator(mtick.MaxNLocator(integer=True))
+    ax_pre.xaxis.set_major_formatter(mtick.ScalarFormatter(useMathText=False))
+    ax_pre.yaxis.set_major_formatter(mtick.ScalarFormatter(useMathText=False))
     ax_pre.xaxis.set_minor_formatter(mtick.ScalarFormatter(useMathText=False))
     ax_pre.yaxis.set_minor_formatter(mtick.ScalarFormatter(useMathText=False))
     plt.setp(ax_pre.spines.values(), linewidth=2.5)
     plt.setp(ax_pre.spines.values(), linewidth=2.5)
     ax_pre.set_xlim(left=1., right=np.ceil(max_for_range))
     ax_pre.set_ylim(bottom=1., top=np.ceil(max_for_range))
-    ax_pre.set_title(title)
+    ax_pre.set_title(title, fontsize=22)
     plt.tight_layout()
     return ax_pre
 
@@ -635,3 +648,47 @@ def plot_shap_decision(pred_type, model_name, shap_values, shap_explainer, col_n
     plt.title(f'{pred_type}: {base_meta}-learner - {model_name}', fontsize=16)
     plt.tight_layout()
     return ax
+
+##########################################
+# Methods for contour plots
+
+def create_colour_gradient(colour_hex):
+    colour_rgb = mcolors.to_rgb(colour_hex)
+    colour_rgb_darker = list(colour_rgb)
+    colour_rgb_bright = list([cut_rgb_val(value * 1.5) for value in list(colour_rgb)])
+    colour_rgb_darker = list([value * 0.7 for value in colour_rgb_darker])
+    colour_rgb_bright = tuple(colour_rgb_bright)
+    colour_rgb_darker = tuple(colour_rgb_darker)
+    colours      = [colour_rgb_darker, colour_rgb_bright] # first color is darker
+    cm_gradient = mcolors.LinearSegmentedColormap.from_list(f'gradient_{colour_hex}', colours, N=50)
+    return cm_gradient
+
+def clean_and_smooth_matrix(matrix, sigma=0.9):
+    matrix[~np.isfinite(matrix)] = 0
+    matrix_smooth = gaussian_filter(matrix, sigma=0.9)
+    matrix_smooth[~np.isfinite(matrix_smooth)] = 0
+    return matrix_smooth
+
+def pad_matrix_zeros(matrix, xedges, yedges):  # Pads matrices and creates centred edges
+    x_centres = 0.5 * (xedges[:-1] + xedges[1:])
+    y_centres = 0.5 * (yedges[:-1] + yedges[1:])
+    matrix    = np.pad(matrix, ((1, 1), (1, 1)), mode='constant', constant_values=(0,))
+    x_centres = np.pad(x_centres, (1, 1), mode='constant', constant_values=(xedges[0], xedges[-1]))
+    y_centres = np.pad(y_centres, (1, 1), mode='constant', constant_values=(yedges[0], yedges[-1]))
+    return matrix, x_centres, y_centres
+
+def fmt(x):
+    x = x * 100.
+    x = 100. - x
+    s = f'{x:.2f}'
+    if s.endswith('0'):
+        s = f'{x:.0f}'
+    return rf'${s} \%$' if plt.rcParams['text.usetex'] else f'{s} %'
+
+def cut_rgb_val(val):
+    if val < 0.0:
+        return 0.0
+    if val > 1.0:
+        return 1.0
+    else:
+        return val
