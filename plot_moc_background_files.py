@@ -27,6 +27,8 @@ show_flag   = False
 
 used_area   = 'HETDEX'  # 'HETDEX', 'S82', 'COSMOS'
 
+plot_all_area = True
+
 file_HETDEX = 'CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits'
 file_S82    = 'CDS-J-AJ-142-3-stripe82_MOC.fits'  # 'CDS-J-AJ-142-3-VLA_STRIPE82_MOC.fits'
 file_COSMOS = 'CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits'
@@ -57,26 +59,54 @@ moc = MOC.load(gv.moc_path + file_name, 'fits')
 moc = moc.degrade_to_order(8)
 
 # load unWISE cutout covering the respective areas
-unWISE_HETDEX = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2Fcolor-W2-W1W2-W1&width=2000&height=630&fov=50&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=195.60533258333334&dec=52.75&format=fits'
-unWISE_S82    = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2Fcolor-W2-W1W2-W1&width=2000&height=200&fov=65&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=3.2827360833333334&dec=-0.12713066666666667&format=fits'
-unWISE_COSMOS = 'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2Fcolor-W2-W1W2-W1&width=1000&height=1000&fov=2.1&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=150.10991254166663&dec=2.2293776944444446&format=fits'
+# could use unWISE colours: 'color-W2-W1W2-W1'
+# or one single unWISE band: 'W1'
+band_2_plot = 'W1' # 'color-W2-W1W2-W1', 'W1'
+unWISE_HETDEX = f'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2F{band_2_plot}&width=2000&height=630&fov=50&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=195.60533258333334&dec=52.75&format=fits'
+unWISE_S82    = f'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2F{band_2_plot}&width=2000&height=200&fov=65&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=3.2827360833333334&dec=-0.12713066666666667&format=fits'
+unWISE_COSMOS = f'https://alasky.cds.unistra.fr/hips-image-services/hips2fits?hips=CDS%2FP%2FunWISE%2F{band_2_plot}&width=1000&height=1000&fov=2.1&projection=AIT&coordsys=icrs&rotation_angle=0.0&ra=150.10991254166663&dec=2.2293776944444446&format=fits'
 
 field_unWISE = {'HETDEX': unWISE_HETDEX, 'S82': unWISE_S82, 'COSMOS': unWISE_COSMOS}
 with fits.open(field_unWISE[used_area]) as hdul:
     # create WCS from unWISE image header
-    unwise_wcs  = WCS(header=hdul[0].header).dropaxis(2)
-    data_unWISE = np.transpose(hdul[0].data, (1, 2, 0))
+    if band_2_plot == 'color-W2-W1W2-W1':
+        unwise_wcs  = WCS(header=hdul[0].header).dropaxis(2)
+        data_unWISE = np.transpose(hdul[0].data, (1, 2, 0))
+    if band_2_plot == 'W1':
+        unwise_wcs  = WCS(header=hdul[0].header)
+        data_unWISE = hdul[0].data
+    # to compute skycoords for every pixel of the image
+    width  = hdul[0].header["NAXIS1"]
+    height = hdul[0].header["NAXIS2"]
+
+if not plot_all_area:
+    xv, yv      = np.meshgrid(np.arange(0, width), np.arange(0, height))
+    skycoords   = unwise_wcs.pixel_to_world(xv, yv)
+    ra, dec     = skycoords.icrs.ra.deg, skycoords.icrs.dec.deg
+    mask_in_moc = moc.contains_lonlat(ra * u.deg, dec * u.deg)
+
+    img_inverse = data_unWISE.copy()
+    try:
+        img_inverse[~mask_in_moc] = np.nan
+    except ValueError:
+        img_inverse[~mask_in_moc] = 1
+
+if plot_all_area:
+    im_to_plot = data_unWISE
+if not plot_all_area:
+    im_to_plot = img_inverse
 
 fig = plt.figure(111, figsize=field_fsize)
 ax = fig.add_subplot(1, 1, 1, projection=unwise_wcs)
 im = ax.imshow(
-    data_unWISE,
-    origin='lower',
-    norm=simple_norm(data_unWISE, 'log', min_percent=0, max_percent=97),
+    im_to_plot,
+    origin='lower', cmap=plt.get_cmap('cet_CET_L17'),
+    norm=simple_norm(data_unWISE, 'log', min_percent=0, max_percent=99.73),
 )
-moc.fill(ax=ax, wcs=unwise_wcs, alpha=0.6, 
-color='w', fill=True, linewidth=1.0)
-moc.border(ax=ax, wcs=unwise_wcs, alpha=1.0, color='k', lw=1.5)
+# if plot_all_area:
+#     moc.fill(ax=ax, wcs=unwise_wcs, alpha=0.6, 
+#     color='w', fill=True, linewidth=1.0)
+moc.border(ax=ax, wcs=unwise_wcs, alpha=1.0, color='w', lw=1.5)
 plt.grid(color='k', linestyle='dashed', alpha=0.5)
 ax.tick_params(which='major', direction='in')
 ax.tick_params(axis='both', which='major', labelsize=12)
