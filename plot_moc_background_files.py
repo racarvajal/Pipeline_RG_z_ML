@@ -34,23 +34,23 @@ file_HETDEX = 'CDS-J-A+A-622-A1-LoTSSDR1_MOC.fits'
 file_S82    = 'CDS-J-AJ-142-3-stripe82_MOC.fits'  # 'CDS-J-AJ-142-3-VLA_STRIPE82_MOC.fits'
 file_COSMOS = 'CDS-J-A+A-602-A1-table1_VLA_COSMOS3GHZ_MOC.fits'
 
-center_HETDEX = SkyCoord('13:02:25.27982 +52:45:00.0000', unit=(u.hourangle, u.deg), frame='icrs')
+center_HETDEX = SkyCoord('12:59:00.00000 +53:00:00.0000', unit=(u.hourangle, u.deg), frame='icrs')
 center_S82    = SkyCoord('00:13:07.85666 -00:07:37.6704', unit=(u.hourangle, u.deg), frame='icrs')
 center_COSMOS = SkyCoord('10:00:26.37901 +02:13:45.7597', unit=(u.hourangle, u.deg), frame='icrs')
 
-fov_HETDEX    = 50 * u.deg
+fov_HETDEX    = 46 * u.deg
 fov_S82       = 65 * u.deg
-fov_COSMOS    = 2.1  * u.deg
+fov_COSMOS    = 2.15 * u.deg
 
-figsize_HETDEX = (8, 3.5)
-figsize_S82    = (10, 3)
-figsize_COSMOS = (5.6, 4.5)
+figsize_HETDEX = (8, 3)
+figsize_S82    = (10, 1.8)
+figsize_COSMOS = (5, 4.5)
 
 width_HETDEX   = 2000
 width_S82      = 2000
 width_COSMOS   = 1000
 
-height_HETDEX   = 630
+height_HETDEX   = 660
 height_S82      = 200
 height_COSMOS   = 1000
 
@@ -131,11 +131,11 @@ im = ax.imshow(
 moc.border(ax=ax, wcs=unwise_wcs, alpha=1.0, color='w', lw=1.5)
 plt.grid(color='k', linestyle='dashed', alpha=0.5)
 ax.tick_params(which='major', direction='in')
-ax.tick_params(axis='both', which='major', labelsize=12)
+ax.tick_params(axis='both', which='major', labelsize=16)
 ax.tick_params(which='major', length=0, width=1.5)
 ax.tick_params(which='minor', length=0)
-ax.set_xlabel('$\mathrm{R.A.}$', size=12)
-ax.set_ylabel('$\mathrm{Declination}$', size=12)
+ax.set_xlabel('$\mathrm{R.A.}$', size=16)
+ax.set_ylabel('$\mathrm{Declination}$', size=16)
 plt.setp(ax.spines.values(), linewidth=2.5)
 plt.tight_layout()
 if save_flag:
