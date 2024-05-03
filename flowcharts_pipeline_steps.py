@@ -3,12 +3,14 @@
 import schemdraw
 from schemdraw import flow
 import schemdraw.elements as elm
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import global_variables as gv
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
 
-# mpl.rcdefaults()
-# plt.rcParams['text.usetex'] = True
+mpl.rcdefaults()
+plt.rcParams['text.usetex'] = True
+
+save_plot_flag = False
 
 with schemdraw.Drawing(show=False) as d:
     init           = flow.Start(h=1.75, w=2.75).at((0, 0)).label('SOURCE\nFROM\nCATALOGUE')
@@ -26,7 +28,8 @@ with schemdraw.Drawing(show=False) as d:
 
     final_ghost    = flow.Start(h=1.0, w=2.5).at((0, -18.0))
     # d.draw(show=True)
-    # d.save(gv.plots_path + 'flowchart_pipeline_initial_steps.pdf')
+    if save_plot_flag:
+        d.save(gv.plots_path + 'flowchart_pipeline_initial_steps.pdf')
 
 with schemdraw.Drawing(show=False) as e:
     init           = flow.Start(h=1.75, w=2.75).at((0, 0)).label('SOURCE\nFROM\nCATALOGUE')
@@ -44,6 +47,7 @@ with schemdraw.Drawing(show=False) as e:
 
     final_ghost    = flow.Start(h=1.0, w=2.5).at((0, -18.0))
     # e.draw(show=True)
-    # e.save(gv.plots_path + 'flowchart_pipeline_ML_steps.pdf')
+    if save_plot_flag:
+        e.save(gv.plots_path + 'flowchart_pipeline_ML_steps.pdf')
 
 print('EOF')

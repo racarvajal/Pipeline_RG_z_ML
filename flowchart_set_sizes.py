@@ -7,7 +7,12 @@
 
 import schemdraw
 from schemdraw import flow
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import global_variables as gv
+
+mpl.rcdefaults()
+plt.rcParams['text.usetex'] = True
 
 save_plot_flag = False
 
