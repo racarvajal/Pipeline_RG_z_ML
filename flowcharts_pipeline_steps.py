@@ -18,7 +18,7 @@ with schemdraw.Drawing(show=False) as d:
     elm.Wire('-', arrow='->').at(init.S).to(AGN_gal_model.N)
     rAGN_model     = flow.Decision(h=2.25, w=4.00, S='Radio AGN', E='Non-radio\nAGN').at((0, -5.5)).label('AGN RADIO\nDETECTION\nSELECTION')
     elm.Wire('-', arrow='->').at(AGN_gal_model.S).to(rAGN_model.N)
-    discarded      = flow.StateEnd(r=1.25).at((5.5, -5.40)).label('DISCARDED\nSOURCE')
+    discarded      = flow.StateEnd(r=1.30).at((5.5, -5.35)).label('NON-RADIO-\nAGN\nSOURCE')
     elm.Wire('-', arrow='->').at(rAGN_model.E).to(discarded.W)
     elm.Wire('-|', arrow='->').at(AGN_gal_model.E).to(discarded.N)
     z_rAGN_model   = flow.Box(h=1.5, w=2.5).at((0, -8.5)).label('REDSHIFT\nESTIMATION')
@@ -27,7 +27,7 @@ with schemdraw.Drawing(show=False) as d:
     elm.Wire('-', arrow='->').at(z_rAGN_model.S).to(final_state.N)
 
     final_ghost    = flow.Start(h=1.0, w=2.5).at((0, -18.0))
-    # d.draw(show=True)
+    # d.draw(show=True)
     if save_plot_flag:
         d.save(gv.plots_path + 'flowchart_pipeline_initial_steps.pdf')
 
@@ -37,7 +37,7 @@ with schemdraw.Drawing(show=False) as e:
     elm.Wire('-', arrow='->').at(init.S).to(AGN_gal_model.N)
     rAGN_model     = flow.Decision(h=2.25, w=4.00, S='Predicted\nas radio', E='Predicted\nas no radio').at((0, -5.5)).label('RADIO\nDETECTION\nMODEL')
     elm.Wire('-', arrow='->').at(AGN_gal_model.S).to(rAGN_model.N)
-    discarded      = flow.StateEnd(r=1.25).at((5.5, -5.40)).label('DISCARDED\nSOURCE')
+    discarded      = flow.StateEnd(r=1.30).at((5.5, -5.35)).label('NON-RADIO-\nAGN\nSOURCE')
     elm.Wire('-', arrow='->').at(rAGN_model.E).to(discarded.W)
     elm.Wire('-|', arrow='->').at(AGN_gal_model.E).to(discarded.N)
     z_rAGN_model   = flow.Box(h=1.5, w=2.5).at((0, -8.75)).label('REDSHIFT\nPREDICTION\nMODEL')
@@ -46,7 +46,7 @@ with schemdraw.Drawing(show=False) as e:
     elm.Wire('-', arrow='->').at(z_rAGN_model.S).to(final_state.N)
 
     final_ghost    = flow.Start(h=1.0, w=2.5).at((0, -18.0))
-    # e.draw(show=True)
+    # e.draw(show=True)
     if save_plot_flag:
         e.save(gv.plots_path + 'flowchart_pipeline_ML_steps.pdf')
 
