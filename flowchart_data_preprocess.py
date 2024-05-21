@@ -10,7 +10,9 @@ import global_variables as gv
 mpl.rcdefaults()
 plt.rcParams['text.usetex'] = True
 
-with schemdraw.Drawing(show=False) as d:
+save_plot_flag = False
+
+with schemdraw.Drawing(show=False, margin=-0.75) as d:
     # d.config(unit=.75)
     init       = flow.Start(h=1.5, w=2.75).at((0, 1.5)).label('CatWISE2020\nSOURCES')# .drop('S')
     cat_AW     = flow.Data(h=1, w=2).at((3.50, -2.0)).label('AW')
@@ -50,5 +52,6 @@ with schemdraw.Drawing(show=False) as d:
 
     final_ghost = flow.Start(h=1.0, w=2.5).at((0, -28.5))
     # d.draw(show=True)
-    # d.save(gv.plots_path + 'flowchart_data_preprocess.pdf')
+    if save_plot_flag:
+        d.save(gv.plots_path + 'flowchart_data_preprocess.pdf')
 print('EOF')
